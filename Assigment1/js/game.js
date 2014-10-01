@@ -31,7 +31,9 @@ monsterImage.src = "images/monster.png";
 
 // Game objects
 var hero = {
-	speed: 256 // movement in pixels per second
+	speed: 256, // movement in pixels per second
+	height: 32,
+	width: 32
 };
 var monster = {};
 var monstersCaught = 0;
@@ -57,19 +59,43 @@ var reset = function () {
 	monster.y = 32 + (Math.random() * (canvas.height - 64));
 };
 
+var moveSpriteUp = function (sprite, modifier, speed) {
+	var nextYPos = sprite.y - speed * modifier;
+	var minYPos = 0;
+	sprite.y = nextYPos < minYPos ? minYPos : nextYPos;
+}
+
+var moveSpriteDown = function (sprite, modifier, speed, sprite_height) {
+	var nextYPos = sprite.y + speed * modifier;
+	var maxYPos = canvas.height - sprite_height;
+	sprite.y = nextYPos > maxYPos ? maxYPos : nextYPos;
+}
+
+var moveSpriteLeft = function (sprite, modifier, speed) {
+	var nextXPos = sprite.x - speed * modifier;
+	var minXPos = 0;
+	sprite.x = nextXPos < minXPos ? minXPos : nextXPos;
+}
+
+var moveSpriteRight = function (sprite, modifier, speed, sprite_width) {
+	var nextXPos = sprite.x + speed * modifier;
+	var maxXPos = canvas.width - sprite_width;
+	sprite.x = nextXPos > maxXPos ? maxXPos : nextXPos;
+}
+
 // Update game objects
 var update = function (modifier) {
 	if (38 in keysDown) { // Player holding up
-		hero.y -= hero.speed * modifier;
+		moveSpriteUp(hero, modifier, hero.speed);
 	}
 	if (40 in keysDown) { // Player holding down
-		hero.y += hero.speed * modifier;
+		moveSpriteDown(hero, modifier, hero.speed, hero.height);
 	}
 	if (37 in keysDown) { // Player holding left
-		hero.x -= hero.speed * modifier;
+		moveSpriteLeft(hero, modifier, hero.speed);
 	}
 	if (39 in keysDown) { // Player holding right
-		hero.x += hero.speed * modifier;
+		moveSpriteRight(hero, modifier, hero.speed, hero.width);
 	}
 
 	// Are they touching?
