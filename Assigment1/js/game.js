@@ -271,7 +271,7 @@ var mouseState = {
 	upCount: 0,
 	isDown: function() {return this.downCount != this.upCount;}};
 
-canvas.addEventListener('mousedown', function(event) {
+window.addEventListener('mousedown', function(event) {
 	var downCount = ++mouseState.downCount;
 
     setTimeout(function() {
@@ -280,12 +280,12 @@ canvas.addEventListener('mousedown', function(event) {
     	}, 200);
 });
 
-canvas.addEventListener('mousemove', function(event) {
+window.addEventListener('mousemove', function(event) {
 	mouseState.x = event.x;
 	mouseState.y = event.y;
 });
 
-canvas.addEventListener('mouseup', function(event) {
+window.addEventListener('mouseup', function(event) {
   ++mouseState.upCount;
   if (mouseState.isHold) {
   	mouseState.isHold = false;
