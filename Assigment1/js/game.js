@@ -76,7 +76,7 @@ var update = function (modifier) {
 		moveSpriteX(hero, hero.x + hero.speed * modifier);
 	}
 
-	if (mouseDown == true) {
+	if (dragHero == true) {
        moveSpriteToTarget(hero, hero.speed * modifier, {x: mousePosX, y: mousePosY});
 	}
 
@@ -185,12 +185,17 @@ function getMousePos(canvas, evt) {
       var canvas = document.getElementById('myCanvas');
       var context = canvas.getContext('2d');
 */
+var dragHero = false;
 var mouseDown = false;
 var mousePosX = 0;
 var mousePosY = 0;
 
 canvas.addEventListener('mousedown', function(event) {
-  mouseDown = true;
+	mouseDown = true;
+    setTimeout(function() {
+    	if (mouseDown == true) {
+    		dragHero = true; }
+    	}, 200);
 });
 
 canvas.addEventListener('mousemove', function(event) {
@@ -200,6 +205,7 @@ canvas.addEventListener('mousemove', function(event) {
 
 canvas.addEventListener('mouseup', function(event) {
   mouseDown = false;
+  dragHero = false;
 });
 
 /*
