@@ -1,6 +1,9 @@
+var BULLET_SPEED = 200;
+
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
+
 //set canvas size to half browser width and height
 canvas.width = window.innerWidth/2;
 canvas.height = window.innerHeight/2;
@@ -30,11 +33,36 @@ monsterImage.onload = function () {
 };
 monsterImage.src = "images/monster.png";
 
+// Bullet image
+var bulletReady = false;
+var bulletImage = new Image();
+bulletImage.onload = function () {
+	bulletReady = true;
+};
+bulletImage.src = "images/bullet_sm.png";
+var bullets = [];
+
 // Game objects
 var hero = {
 	speed: 256, // movement in pixels per second
 	height: 32,
-	width: 32
+	width: 32,
+	fireBullet: function(direction) {
+		console.log('firing bullet');
+        var deltaY = direction.y - hero.y;
+        var deltaX = direction.x - hero.x;
+
+        var angle = deltaX == 0 ? 0 : Math.atan(deltaY / deltaX);
+        var stepY = deltaX < 0 ? -Math.sin(angle) : Math.sin(angle);
+        var stepX = deltaX < 0 ? -Math.cos(angle) : Math.cos(angle);
+        var newBullet = {
+        	stepX: stepX,
+        	stepY: stepY,
+        	x: hero.x,
+        	y: hero.y,
+        };
+        bullets.push(newBullet);
+	}
 };
 
 var monster = {};
@@ -76,9 +104,11 @@ var update = function (modifier) {
 		moveSpriteX(hero, hero.x + hero.speed * modifier);
 	}
 
-	if (dragHero == true) {
-       moveSpriteToTarget(hero, hero.speed * modifier, {x: mousePosX, y: mousePosY});
+	if (mouseState.isHold == true) {
+       moveSpriteToTarget(hero, hero.speed * modifier, {x: mouseState.x, y: mouseState.y});
 	}
+
+	updateBullets(modifier);
 
 	// Are they touching?
 	if (
@@ -115,6 +145,22 @@ var moveSpriteToTarget = function(sprite, stepSize, destination) {
   moveSpriteY(sprite, nextYPos);
 };
 
+var updateBullets = function(modifier) {
+    for (var i = 0; i < bullets.length; ++i) {
+        bullets[i].x += bullets[i].stepX * BULLET_SPEED * modifier;
+        bullets[i].y += bullets[i].stepY * BULLET_SPEED * modifier;
+        if (isOffscreen(bullets[i])) {
+            bullets.splice(i, 1);
+        }
+    }
+}
+
+var isOffscreen = function(sprite) {
+  if (sprite.x < 0 || sprite.x > canvas.width || sprite.y < 0 || sprite.y > canvas.height) {
+  	return true;
+  }
+  return false;
+}
 var moveSpriteX = function(sprite, newXPos) {
     if (newXPos < 0) {
         sprite.x = 0;
@@ -153,6 +199,12 @@ var render = function () {
 		ctx.drawImage(monsterImage, monster.x, monster.y);
 	}
 
+	if (bulletReady) {
+		for (var i = 0; i < bullets.length; ++i) {
+		    ctx.drawImage(bulletImage, bullets[i].x, bullets[i].y);
+		}
+	}
+
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "24px Helvetica";
@@ -175,27 +227,36 @@ var main = function () {
 	requestAnimationFrame(main);
 };
 
-var dragHero = false;
-var mouseDown = false;
-var mousePosX = 0;
-var mousePosY = 0;
+var mouseState = {
+	x: 0,
+	y: 0,
+	isHold: false,
+	downCount: 0,
+	upCount: 0,
+	isDown: function() {return this.downCount != this.upCount;}};
 
 canvas.addEventListener('mousedown', function(event) {
-	mouseDown = true;
+	var downCount = ++mouseState.downCount;
+
     setTimeout(function() {
-    	if (mouseDown == true) {
-    		dragHero = true; }
+    	if (mouseState.isDown() && mouseState.downCount == downCount) {
+    		mouseState.isHold = true; }
     	}, 200);
 });
 
 canvas.addEventListener('mousemove', function(event) {
-    mousePosX = event.x;
-    mousePosY = event.y;
+	mouseState.x = event.x;
+	mouseState.y = event.y;
 });
 
 canvas.addEventListener('mouseup', function(event) {
-  mouseDown = false;
-  dragHero = false;
+  ++mouseState.upCount;
+  if (mouseState.isHold) {
+  	mouseState.isHold = false;
+  	return;
+  } else {
+  	hero.fireBullet({x: event.x, y: event.y});
+  }
 });
 
 var w = window;
