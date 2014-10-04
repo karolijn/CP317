@@ -101,10 +101,17 @@ addEventListener("keyup", function (e) {
 	delete keysDown[e.keyCode];
 }, false);
 
-// Reset the game when the player catches a monster
-var reset = function () {
+// Reset the game when the player dies
+var newGame = function () {
 	hero.x = canvas.width / 2;
 	hero.y = canvas.height / 2;
+	
+	alert("New Game!");
+
+	monstersCaught = 0;
+	monsters = [];
+	bullets = [];
+
 };
 
 // Update game objects
@@ -139,9 +146,7 @@ var update = function (modifier) {
 			&& hero.y <= (monsters[i].y + 32)
 			&& monsters[i].y <= (hero.y + 32)
 		) {
-			++monstersCaught;
-		   	monsters.splice(i, 1);
-			reset();
+			newGame();
 		}
 	}
 	
@@ -331,6 +336,6 @@ requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame
 
 // Let's play this game!
 var then = Date.now();
+newGame();
 setInterval(addGoblin,3000);
-reset();
 main();
