@@ -1,6 +1,7 @@
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
+//set canvas size to half browser width and height
 canvas.width = window.innerWidth/2;
 canvas.height = window.innerHeight/2;
 document.body.appendChild(canvas);
@@ -112,6 +113,7 @@ var update = function (modifier) {
 
 // Draw everything
 var render = function () {
+	//reset canvas size if browser has been resized
 	canvas.width = window.innerWidth/2;
 	canvas.height = window.innerHeight/2;
 
