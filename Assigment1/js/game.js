@@ -210,7 +210,6 @@ var updateBullets = function(modifier) {
 			) {
 				++monstersCaught;
 		   		monsters.splice(j, 1);
-				reset();
 				didHitMonster = true;
 			}
         }
