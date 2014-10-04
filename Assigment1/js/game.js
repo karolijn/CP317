@@ -37,7 +37,13 @@ var hero = {
 	width: 32
 };
 
-var monster = {};
+var monster = {
+	speed: 256,
+	height: 32,
+	width: 32,
+	xdirection: 0,
+	ydirection: 0,
+};
 var monstersCaught = 0;
 
 // Handle keyboard controls
@@ -59,6 +65,9 @@ var reset = function () {
 	// Throw the monster somewhere on the screen randomly
 	monster.x = 32 + (Math.random() * (canvas.width - 64));
 	monster.y = 32 + (Math.random() * (canvas.height - 64));
+	
+	monster.xdirection = (Math.random() * 2) - 1;
+	monster.ydirection = (Math.random() * 2) - 1;
 };
 
 // Update game objects
@@ -75,7 +84,10 @@ var update = function (modifier) {
 	if (39 in keysDown) { // Player holding right
 		moveSpriteX(hero, hero.x + hero.speed * modifier);
 	}
-
+	
+	moveMonster(monster, modifier);
+	
+	
 	if (mouseDown == true) {
        moveSpriteToTarget(hero, hero.speed * modifier, {x: mousePosX, y: mousePosY});
 	}
@@ -91,6 +103,30 @@ var update = function (modifier) {
 		reset();
 	}
 };
+
+
+var moveMonster = function(enemy, modifier){
+	var newXPos = enemy.x + enemy.xdirection * enemy.speed * modifier;
+	if (newXPos < 0) {
+        enemy.x = 0;
+		enemy.xdirection = -enemy.xdirection;
+    } else if (newXPos > canvas.width - enemy.width) {
+    	enemy.x = canvas.width - enemy.width;
+		enemy.xdirection = -enemy.xdirection;
+    } else {
+        enemy.x = newXPos;
+    }
+	var newYPos = enemy.y + enemy.ydirection * enemy.speed * modifier;
+	if (newYPos < 0) {
+       enemy.y = 0;
+	   enemy.ydirection = -enemy.ydirection;
+   } else if (newYPos > canvas.height - enemy.height) {
+   	   enemy.y = canvas.height - enemy.height;
+	   enemy.ydirection = -enemy.ydirection;
+   } else {
+		enemy.y = newYPos;
+   }
+}
 
 var moveSpriteToTarget = function(sprite, stepSize, destination) {
   var deltaY = destination.y - sprite.y;
