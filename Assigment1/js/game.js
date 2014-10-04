@@ -198,7 +198,24 @@ var updateBullets = function(modifier) {
     for (var i = 0; i < bullets.length; ++i) {
         bullets[i].x += bullets[i].stepX * BULLET_SPEED * modifier;
         bullets[i].y += bullets[i].stepY * BULLET_SPEED * modifier;
-        if (isOffscreen(bullets[i])) {
+        
+        var didHitMonster = false;
+
+        for (var j = 0; j < monsters.length; j++) {
+        	if (
+				bullets[i].x <= (monsters[j].x + 32)
+				&& monsters[j].x <= (bullets[i].x + 32)
+				&& bullets[i].y <= (monsters[j].y + 32)
+				&& monsters[j].y <= (bullets[i].y + 32)
+			) {
+				++monstersCaught;
+		   		monsters.splice(j, 1);
+				reset();
+				didHitMonster = true;
+			}
+        }
+
+        if (isOffscreen(bullets[i]) || didHitMonster) {
             bullets.splice(i, 1);
         }
     }
