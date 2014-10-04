@@ -65,14 +65,30 @@ var hero = {
 	}
 };
 
-var monster = {
-	speed: 256,
-	height: 32,
-	width: 32,
-	xdirection: 0,
-	ydirection: 0,
+function Monster() {
+	this.speed = 256;
+	this.height = 32;
+	this.width = 32;
+	this.xdirection = 0;
+	this.ydirection = 0;
 };
+var monsters = [];
 var monstersCaught = 0;
+
+
+var addGoblin = function () {
+	var newMonster = new Monster();
+
+	newMonster.x = 32 + (Math.random() * (canvas.width - 64));
+	newMonster.y = 32 + (Math.random() * (canvas.height - 64));
+	
+	newMonster.xdirection = (Math.random() * 2) - 1;
+	newMonster.ydirection = (Math.random() * 2) - 1;
+
+	ctx.drawImage(monsterImage, newMonster.x, newMonster.y);
+	monsters.push(newMonster);
+
+};
 
 // Handle keyboard controls
 var keysDown = {};
@@ -89,13 +105,6 @@ addEventListener("keyup", function (e) {
 var reset = function () {
 	hero.x = canvas.width / 2;
 	hero.y = canvas.height / 2;
-
-	// Throw the monster somewhere on the screen randomly
-	monster.x = 32 + (Math.random() * (canvas.width - 64));
-	monster.y = 32 + (Math.random() * (canvas.height - 64));
-	
-	monster.xdirection = (Math.random() * 2) - 1;
-	monster.ydirection = (Math.random() * 2) - 1;
 };
 
 // Update game objects
@@ -113,9 +122,6 @@ var update = function (modifier) {
 		moveSpriteX(hero, hero.x + hero.speed * modifier);
 	}
 
-	moveMonster(monster, modifier);
-
-
 	if (mouseState.isHold == true) {
        moveSpriteToTarget(hero, hero.speed * modifier, {x: mouseState.x, y: mouseState.y});
 	}
@@ -123,15 +129,22 @@ var update = function (modifier) {
 	updateBullets(modifier);
 
 	// Are they touching?
-	if (
-		hero.x <= (monster.x + 32)
-		&& monster.x <= (hero.x + 32)
-		&& hero.y <= (monster.y + 32)
-		&& monster.y <= (hero.y + 32)
-	) {
-		++monstersCaught;
-		reset();
+	for (var i = 0; i < monsters.length; i++) {
+
+		moveMonster(monsters[i], modifier);
+
+		if (
+			hero.x <= (monsters[i].x + 32)
+			&& monsters[i].x <= (hero.x + 32)
+			&& hero.y <= (monsters[i].y + 32)
+			&& monsters[i].y <= (hero.y + 32)
+		) {
+			++monstersCaught;
+		   	monsters.splice(i, 1);
+			reset();
+		}
 	}
+	
 };
 
 
@@ -232,7 +245,9 @@ var render = function () {
 	}
 
 	if (monsterReady) {
-		ctx.drawImage(monsterImage, monster.x, monster.y);
+		for (var j = 0; j < monsters.length; j++) {
+			ctx.drawImage(monsterImage, monsters[j].x, monsters[j].y);
+		}
 	}
 
 	if (bulletReady) {
@@ -300,5 +315,6 @@ requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame
 
 // Let's play this game!
 var then = Date.now();
+setInterval(addGoblin,3000);
 reset();
 main();
