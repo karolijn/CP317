@@ -1,5 +1,14 @@
 var BULLET_SPEED = 200;
 
+var mouseState = {
+	x: 0,
+	y: 0,
+	isHold: false,
+	downCount: 0,
+	upCount: 0,
+	isDown: function() {return this.downCount != this.upCount;}
+};
+
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
@@ -103,6 +112,9 @@ addEventListener("keyup", function (e) {
 
 // Reset the game when the player dies
 var newGame = function () {
+	keysDown = {};
+	mouseState.isHold = false;
+
 	hero.x = canvas.width / 2;
 	hero.y = canvas.height / 2;
 	
@@ -298,14 +310,6 @@ var main = function () {
 	// Request to do this again ASAP
 	requestAnimationFrame(main);
 };
-
-var mouseState = {
-	x: 0,
-	y: 0,
-	isHold: false,
-	downCount: 0,
-	upCount: 0,
-	isDown: function() {return this.downCount != this.upCount;}};
 
 window.addEventListener('mousedown', function(event) {
 	var downCount = ++mouseState.downCount;
