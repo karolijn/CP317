@@ -35,6 +35,7 @@ var hero = {
 	height: 32,
 	width: 32
 };
+
 var monster = {};
 var monstersCaught = 0;
 
@@ -59,43 +60,23 @@ var reset = function () {
 	monster.y = 32 + (Math.random() * (canvas.height - 64));
 };
 
-var moveSpriteUp = function (sprite, modifier, speed) {
-	var nextYPos = sprite.y - speed * modifier;
-	var minYPos = 0;
-	sprite.y = nextYPos < minYPos ? minYPos : nextYPos;
-}
-
-var moveSpriteDown = function (sprite, modifier, speed, sprite_height) {
-	var nextYPos = sprite.y + speed * modifier;
-	var maxYPos = canvas.height - sprite_height;
-	sprite.y = nextYPos > maxYPos ? maxYPos : nextYPos;
-}
-
-var moveSpriteLeft = function (sprite, modifier, speed) {
-	var nextXPos = sprite.x - speed * modifier;
-	var minXPos = 0;
-	sprite.x = nextXPos < minXPos ? minXPos : nextXPos;
-}
-
-var moveSpriteRight = function (sprite, modifier, speed, sprite_width) {
-	var nextXPos = sprite.x + speed * modifier;
-	var maxXPos = canvas.width - sprite_width;
-	sprite.x = nextXPos > maxXPos ? maxXPos : nextXPos;
-}
-
 // Update game objects
 var update = function (modifier) {
 	if (38 in keysDown) { // Player holding up
-		moveSpriteUp(hero, modifier, hero.speed);
+		moveSpriteY(hero, hero.y - hero.speed * modifier);
 	}
 	if (40 in keysDown) { // Player holding down
-		moveSpriteDown(hero, modifier, hero.speed, hero.height);
+		moveSpriteY(hero, hero.y + hero.speed * modifier);
 	}
 	if (37 in keysDown) { // Player holding left
-		moveSpriteLeft(hero, modifier, hero.speed);
+		moveSpriteX(hero, hero.x - hero.speed * modifier);
 	}
 	if (39 in keysDown) { // Player holding right
-		moveSpriteRight(hero, modifier, hero.speed, hero.width);
+		moveSpriteX(hero, hero.x + hero.speed * modifier);
+	}
+
+	if (mouseDown == true) {
+       moveSpriteToTarget(hero, hero.speed * modifier, {x: mousePosX, y: mousePosY});
 	}
 
 	// Are they touching?
@@ -109,6 +90,49 @@ var update = function (modifier) {
 		reset();
 	}
 };
+
+var moveSpriteToTarget = function(sprite, stepSize, destination) {
+  var deltaY = destination.y - sprite.y;
+  var deltaX = destination.x - sprite.x;
+
+  var angle = deltaX == 0 ? 0 : Math.atan(deltaY / deltaX);
+  var stepY = Math.sin(angle) * stepSize;
+  var stepX = Math.cos(angle) * stepSize
+
+  var nextXPos = deltaX < 0 ? sprite.x - stepX : sprite.x + stepX;
+  var nextYPos = deltaX < 0 ? sprite.y - stepY : sprite.y + stepY;
+
+  // If the distance to the destination is shorter than the step, go there.
+  if (Math.abs(nextYPos - sprite.y) > Math.abs(destination.y - sprite.y)) {
+      nextYPos = destination.y;
+  }
+  if (Math.abs(nextXPos - sprite.x) > Math.abs(destination.x - sprite.x)) {
+      nextXPos = destination.x;
+  }
+
+  moveSpriteX(sprite, nextXPos);
+  moveSpriteY(sprite, nextYPos);
+};
+
+var moveSpriteX = function(sprite, newXPos) {
+    if (newXPos < 0) {
+        sprite.x = 0;
+    } else if (newXPos > canvas.width - sprite.width) {
+    	sprite.x = canvas.width - sprite.width;
+    } else {
+        sprite.x = newXPos;
+    }
+}
+
+var moveSpriteY = function(sprite, newYPos) {
+   if (newYPos < 0) {
+       sprite.y = 0;
+   } else if (newYPos > canvas.height - sprite.height) {
+   	   sprite.y = canvas.height - sprite.height;
+   } else {
+   	sprite.y = newYPos;
+   }
+}
 
 // Draw everything
 var render = function () {
@@ -145,7 +169,42 @@ var main = function () {
 	// Request to do this again ASAP
 	requestAnimationFrame(main);
 };
+/*
+function getMousePos(canvas, evt) {
+  var rect = canvas.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+        };
+      }
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+*/
+var mouseDown = false;
+var mousePosX = 0;
+var mousePosY = 0;
 
+canvas.addEventListener('mousedown', function(event) {
+  mouseDown = true;
+});
+
+canvas.addEventListener('mousemove', function(event) {
+    mousePosX = event.x;
+    mousePosY = event.y;
+});
+
+canvas.addEventListener('mouseup', function(event) {
+  mouseDown = false;
+});
+
+/*
+      addEventListener('mousemove', function(evt) {
+        var mousePos = getMousePos(canvas, evt);
+        var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+        writeMessage(canvas, message);
+      }, false);
+
+canvas.addEventListener('mou')*/
 // Cross-browser support for requestAnimationFrame
 var w = window;
 requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
