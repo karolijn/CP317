@@ -18,6 +18,9 @@ document.body.appendChild(canvas);
 
 var fireSound = new Audio("audio/shot.wav");
 var backgroundMusic = new Audio("audio/POL-cactus-land-short.wav");
+var gameOverSound = new Audio("audio/gameOver.wav");
+var scream = new Audio("audio/scream.mp3");
+
 
 /*
  * IMAGES
@@ -299,8 +302,10 @@ var updateBullets = function(modifier) {
                 && monsters[j].y <= (bullets[i].y + 32)
             ) {
                 //Store monsters caught
+                scream.currentTime = 0;
+                scream.play();
                 scoreboard.addPoint();
-                  monsters.splice(j, 1);
+                monsters.splice(j, 1);
                 didHitMonster = true;
             }
         }
@@ -420,7 +425,9 @@ var update = function (modifier) {
             && hero.y <= (monsters[i].y + 32)
             && monsters[i].y <= (hero.y + 32)
         ) {
-            newGame();
+            backgroundMusic.pause();
+            gameOverSound.play();
+            gameOverSound.addEventListener('ended', newGame);
         }
     }
 
