@@ -39,7 +39,7 @@ var bulletImage = new Image();
 bulletImage.onload = function () {
 	bulletReady = true;
 };
-bulletImage.src = "images/bullet_sm.png";
+bulletImage.src = "images/squareBullet.png";
 var bullets = [];
 
 // Game objects
@@ -48,22 +48,25 @@ var hero = {
 	height: 32,
 	width: 32,
 	fireBullet: function(direction) {
-		console.log('firing bullet');
-        var deltaY = direction.y - hero.y;
-        var deltaX = direction.x - hero.x;
-
-        var angle = deltaX == 0 ? 0 : Math.atan(deltaY / deltaX);
-        var stepY = deltaX < 0 ? -Math.sin(angle) : Math.sin(angle);
-        var stepX = deltaX < 0 ? -Math.cos(angle) : Math.cos(angle);
+        var angle = calculateAngle(direction, hero)
+        var stepY = Math.sin(angle);
+        var stepX = Math.cos(angle);
         var newBullet = {
         	stepX: stepX,
         	stepY: stepY,
         	x: hero.x,
         	y: hero.y,
+        	angle: angle
         };
         bullets.push(newBullet);
 	}
 };
+
+// Given a sprite with coordinates in the top left corner,
+// return the coordinates of the centre of the sprite.
+var centerCoordinates = function(sprite) {
+    return {x: sprite.x + (sprite.width/2), y: sprite.y + (sprite.height/2)};
+}
 
 function Monster() {
 	this.speed = 256;
@@ -72,6 +75,23 @@ function Monster() {
 	this.xdirection = 0;
 	this.ydirection = 0;
 };
+
+var calculateAngle = function (destination, source) {
+    var deltaY = destination.y - centerCoordinates(source).y;
+    var deltaX = destination.x - centerCoordinates(source).x;
+
+    var angle = Math.atan(deltaY / deltaX);
+    if (deltaX < 0 && deltaY <= 0) {
+        console.log(angle);
+        angle -= Math.PI;
+    }
+    if (deltaX < 0 && deltaY > 0) {
+        angle += Math.PI;
+    }
+
+    return angle;
+}
+
 var monsters = [];
 var monstersCaught = 0;
 
@@ -126,7 +146,7 @@ var update = function (modifier) {
        moveSpriteToTarget(hero, hero.speed * modifier, {x: mouseState.x, y: mouseState.y});
 	}
 
-	updateBullets(modifier);
+	//updateBullets(modifier);
 
 	// Are they touching?
 	for (var i = 0; i < monsters.length; i++) {
@@ -210,6 +230,7 @@ var isOffscreen = function(sprite) {
   }
   return false;
 }
+
 var moveSpriteX = function(sprite, newXPos) {
     if (newXPos < 0) {
         sprite.x = 0;
@@ -252,7 +273,13 @@ var render = function () {
 
 	if (bulletReady) {
 		for (var i = 0; i < bullets.length; ++i) {
-		    ctx.drawImage(bulletImage, bullets[i].x, bullets[i].y);
+			drawBullet(bullets[i]);
+            /*ctx.translate(bullets[i].x, bullets[i].y);
+			ctx.rotate(bullets[i].angle);
+			console.log(bulletImage.width)
+		    ctx.drawImage(bulletImage, -bulletImage.width/2, -bulletImage.height/2);
+		    ctx.rotate(-bullets[i].angle);
+		    ctx.translate(-bullets[i].x, -bullets[i].y);*/
 		}
 	}
 
@@ -264,6 +291,14 @@ var render = function () {
 	ctx.fillText("Goblins caught: " + monstersCaught, 32, 32);
 };
 
+var drawBullet = function (bullet) {
+    ctx.translate(bullet.x + bulletImage.width/2, bullet.y + bulletImage.height/2);
+	ctx.rotate(bullet.angle);
+	console.log(bulletImage.width)
+	ctx.drawImage(bulletImage, -bulletImage.width/2, -bulletImage.height/2);
+	ctx.rotate(-bullet.angle);
+	ctx.translate(-(bullet.x + bulletImage.width/2), -(bullet.y + bulletImage.height/2));
+}
 // The main game loop
 var main = function () {
 	var now = Date.now();
