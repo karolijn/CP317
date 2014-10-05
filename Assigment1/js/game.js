@@ -1,3 +1,7 @@
+// Sounds
+var fireSound = new Audio("audio/shot.wav");
+var backgroundMusic = new Audio("audio/POL-cactus-land-short.wav");
+
 var mouseState = {
 	x: 0,
 	y: 0,
@@ -72,6 +76,8 @@ var hero = {
 	height: 32,
 	width: 32,
 	fireBullet: function(direction) {
+		fireSound.currentTime = 0;
+		fireSound.play();
         var newBullet = new Bullet();
         newBullet.angle = calculateAngle(direction, hero);
         newBullet.x = hero.x;
@@ -157,6 +163,9 @@ window.addEventListener("keyup", function (e) {
 
 // Reset the game when the player dies
 var newGame = function () {
+	backgroundMusic.loop = true;
+	backgroundMusic.volume = 0.35;
+	backgroundMusic.play();
 	keysDown = {};
 
 	hero.x = canvas.width / 2;
