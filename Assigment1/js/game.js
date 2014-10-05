@@ -1,5 +1,14 @@
 var BULLET_SPEED = 200;
 
+var mouseState = {
+	x: 0,
+	y: 0,
+	isHold: false,
+	downCount: 0,
+	upCount: 0,
+	isDown: function() {return this.downCount != this.upCount;}
+};
+
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
@@ -120,10 +129,20 @@ addEventListener("keyup", function (e) {
 	delete keysDown[e.keyCode];
 }, false);
 
-// Reset the game when the player catches a monster
-var reset = function () {
+// Reset the game when the player dies
+var newGame = function () {
+	keysDown = {};
+	mouseState.isHold = false;
+
 	hero.x = canvas.width / 2;
 	hero.y = canvas.height / 2;
+	
+	alert("New Game!");
+
+	monstersCaught = 0;
+	monsters = [];
+	bullets = [];
+
 };
 
 // Update game objects
@@ -158,9 +177,7 @@ var update = function (modifier) {
 			&& hero.y <= (monsters[i].y + 32)
 			&& monsters[i].y <= (hero.y + 32)
 		) {
-			++monstersCaught;
-		   	monsters.splice(i, 1);
-			reset();
+			newGame();
 		}
 	}
 	
@@ -217,7 +234,23 @@ var updateBullets = function(modifier) {
     for (var i = 0; i < bullets.length; ++i) {
         bullets[i].x += bullets[i].stepX * BULLET_SPEED * modifier;
         bullets[i].y += bullets[i].stepY * BULLET_SPEED * modifier;
-        if (isOffscreen(bullets[i])) {
+        
+        var didHitMonster = false;
+
+        for (var j = 0; j < monsters.length; j++) {
+        	if (
+				bullets[i].x <= (monsters[j].x + 32)
+				&& monsters[j].x <= (bullets[i].x + 32)
+				&& bullets[i].y <= (monsters[j].y + 32)
+				&& monsters[j].y <= (bullets[i].y + 32)
+			) {
+				++monstersCaught;
+		   		monsters.splice(j, 1);
+				didHitMonster = true;
+			}
+        }
+
+        if (isOffscreen(bullets[i]) || didHitMonster) {
             bullets.splice(i, 1);
         }
     }
@@ -307,14 +340,6 @@ var main = function () {
 	requestAnimationFrame(main);
 };
 
-var mouseState = {
-	x: 0,
-	y: 0,
-	isHold: false,
-	downCount: 0,
-	upCount: 0,
-	isDown: function() {return this.downCount != this.upCount;}};
-
 window.addEventListener('mousedown', function(event) {
 	var downCount = ++mouseState.downCount;
 
@@ -344,6 +369,6 @@ requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame
 
 // Let's play this game!
 var then = Date.now();
+newGame();
 setInterval(addGoblin,3000);
-reset();
 main();
