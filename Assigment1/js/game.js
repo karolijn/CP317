@@ -39,7 +39,7 @@ var bulletImage = new Image();
 bulletImage.onload = function () {
 	bulletReady = true;
 };
-bulletImage.src = "images/squareBullet.png";
+bulletImage.src = "images/bullet_sm.png";
 var bullets = [];
 
 // Game objects
@@ -88,7 +88,6 @@ var calculateAngle = function (destination, source) {
     if (deltaX < 0 && deltaY > 0) {
         angle += Math.PI;
     }
-
     return angle;
 }
 
@@ -146,7 +145,7 @@ var update = function (modifier) {
        moveSpriteToTarget(hero, hero.speed * modifier, {x: mouseState.x, y: mouseState.y});
 	}
 
-	//updateBullets(modifier);
+	updateBullets(modifier);
 
 	// Are they touching?
 	for (var i = 0; i < monsters.length; i++) {
@@ -274,12 +273,6 @@ var render = function () {
 	if (bulletReady) {
 		for (var i = 0; i < bullets.length; ++i) {
 			drawBullet(bullets[i]);
-            /*ctx.translate(bullets[i].x, bullets[i].y);
-			ctx.rotate(bullets[i].angle);
-			console.log(bulletImage.width)
-		    ctx.drawImage(bulletImage, -bulletImage.width/2, -bulletImage.height/2);
-		    ctx.rotate(-bullets[i].angle);
-		    ctx.translate(-bullets[i].x, -bullets[i].y);*/
 		}
 	}
 
@@ -299,6 +292,7 @@ var drawBullet = function (bullet) {
 	ctx.rotate(-bullet.angle);
 	ctx.translate(-(bullet.x + bulletImage.width/2), -(bullet.y + bulletImage.height/2));
 }
+
 // The main game loop
 var main = function () {
 	var now = Date.now();
