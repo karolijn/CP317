@@ -1,32 +1,6 @@
-// Sounds
-var fireSound = new Audio("audio/shot.wav");
-var backgroundMusic = new Audio("audio/POL-cactus-land-short.wav");
-
-var mouseState = {
-    x: 0,
-    y: 0,
-    isHold: false,
-    downCount: 0,
-    upCount: 0,
-    isDown: function() {return this.downCount > this.upCount;},
-};
-
-var boundaries = {
-    getTopBoundary: function(sprite) {
-        return 0 + sprite.height/2;
-    },
-    getBottomBoundary: function(sprite) {
-        return canvas.height - sprite.height/2;
-    },
-    getLeftBoundary: function(sprite) {
-        return 0 + sprite.width/2;
-    },
-    getRightBoundary: function(sprite) {
-        return canvas.width - sprite.width/2;
-    }
-}
-
-var monsters = [];
+/*
+ * ENVIRONMENT
+ */
 
 // Create the canvas
 var canvas = document.createElement("canvas");
@@ -36,6 +10,18 @@ var ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth/2;
 canvas.height = window.innerHeight/2;
 document.body.appendChild(canvas);
+
+
+/*
+ * SOUNDS
+ */
+
+var fireSound = new Audio("audio/shot.wav");
+var backgroundMusic = new Audio("audio/POL-cactus-land-short.wav");
+
+/*
+ * IMAGES
+ */
 
 // Background image
 var bgReady = false;
@@ -68,23 +54,87 @@ bulletImage.onload = function () {
     bulletReady = true;
 };
 bulletImage.src = "images/bullet_sm.png";
-var bullets = [];
 
-// Game objects
-var hero = {
-    speed: 256, // movement in pixels per second
-    height: 32,
-    width: 32,
-    fireBullet: function(direction) {
-        fireSound.currentTime = 0;
-        fireSound.play();
-        var newBullet = new Bullet();
-        newBullet.angle = calculateAngle(direction, hero);
-        newBullet.x = hero.x;
-        newBullet.y = hero.y;
-        bullets.push(newBullet);
-    }
+
+/*
+ *  CONTROLS
+ */
+
+// Handle keyboard controls
+var keysDown = {};
+
+window.addEventListener("keydown", function (e) {
+    keysDown[e.keyCode] = true;
+}, false);
+
+window.addEventListener("keyup", function (e) {
+    delete keysDown[e.keyCode];
+}, false);
+
+window.addEventListener('mousedown', function(event) {
+    var downCount = ++mouseState.downCount;
+    setTimeout(function() {
+        if (mouseState.isDown() && downCount == mouseState.downCount) {
+            console.log("holding!");
+            mouseState.isHold = true;
+        }
+    }, 200);
+});
+
+window.addEventListener('mousemove', function(event) {
+    mouseState.x = event.x;
+    mouseState.y = event.y;
+});
+
+window.addEventListener('mouseup', function(event) {
+  ++mouseState.upCount;
+  if (!mouseState.isHold) {
+      hero.fireBullet({x: event.x, y: event.y});
+  }
+  mouseState.isHold = false;
+});
+
+
+/*
+ *   ENVIRONMENT UTILITIES
+ */
+var mouseState = {
+    x: 0,
+    y: 0,
+    isHold: false,
+    downCount: 0,
+    upCount: 0,
+    isDown: function() {return this.downCount > this.upCount;},
 };
+
+var boundaries = {
+    getTopBoundary: function(sprite) {
+        return 0 + sprite.height/2;
+    },
+    getBottomBoundary: function(sprite) {
+        return canvas.height - sprite.height/2;
+    },
+    getLeftBoundary: function(sprite) {
+        return 0 + sprite.width/2;
+    },
+    getRightBoundary: function(sprite) {
+        return canvas.width - sprite.width/2;
+    }
+}
+
+var isOffscreen = function(sprite) {
+  if (sprite.x < 0 || sprite.x > canvas.width || sprite.y < 0 || sprite.y > canvas.height) {
+      return true;
+  }
+  return false;
+}
+
+
+/*
+ * GAME ELEMENTS
+ */
+var monsters = [];
+var bullets = [];
 
 function Monster() {
     this.speed = 256;
@@ -109,6 +159,69 @@ function Bullet() {
     this.y = 0;
 }
 
+var hero = {
+    speed: 256, // movement in pixels per second
+    height: 32,
+    width: 32,
+    fireBullet: function(direction) {
+        fireSound.currentTime = 0;
+        fireSound.play();
+        var newBullet = new Bullet();
+        newBullet.angle = calculateAngle(direction, hero);
+        newBullet.x = hero.x;
+        newBullet.y = hero.y;
+        bullets.push(newBullet);
+    }
+};
+
+var scoreboard = {
+  getHighScore: function() {
+      if (!localStorage.highScore) {
+          localStorage.highScore = 0;
+      }
+      return localStorage.highScore;
+  },
+
+  getCurrentScore: function() {
+    if (!localStorage.currentScore) {
+        localStorage.currentScore = 0;
+    }
+      return parseInt(localStorage.currentScore);
+  },
+
+  getCumulativeScore: function() {
+      if (!localStorage.cumulativeScore) {
+          localStorage.cumulativeScore = 0;
+      }
+      return parseInt(localStorage.cumulativeScore);
+  },
+
+  addPoint: function() {
+      if (!localStorage.currentScore) {
+          localStorage.currentScore = 0;
+      }
+      if (!localStorage.cumulativeScore) {
+          localStorage.cumulativeScore = 0;
+      }
+      if (!localStorage.highScore) {
+          localStorage.cumulativeScore = 0;
+      }
+      localStorage.cumulativeScore = parseInt(localStorage.cumulativeScore) + 1;
+      localStorage.currentScore = parseInt(localStorage.currentScore) + 1;
+      if (parseInt(localStorage.highScore) < parseInt(localStorage.currentScore)) {
+          localStorage.highScore = localStorage.currentScore;
+      }
+  },
+
+  resetGame: function() {
+      localStorage.currentScore = 0;
+  }
+}
+
+/*
+ *  SPRITE UTILITIES
+ */
+
 // Given a sprite with coordinates in the top left corner,
 // return the coordinates of the centre of the sprite.
 var centerCoordinates = function(sprite) {
@@ -129,7 +242,6 @@ var calculateAngle = function (destination, source) {
     return angle;
 }
 
-
 var addGoblin = function () {
     var newMonster = new Monster();
     // Get random x coord between left and right boundaries.
@@ -149,16 +261,115 @@ var addGoblin = function () {
     monsters.push(newMonster);
 };
 
-// Handle keyboard controls
-var keysDown = {};
+var moveMonster = function(enemy, modifier){
+    var newXPos = enemy.x + enemy.xdirection * enemy.speed * modifier;
+    if (newXPos < boundaries.getLeftBoundary(enemy)) {
+        enemy.x = boundaries.getLeftBoundary(enemy);
+        enemy.xdirection = -enemy.xdirection;
+    } else if (newXPos > boundaries.getRightBoundary(enemy)) {
+        enemy.x = boundaries.getRightBoundary(enemy);
+        enemy.xdirection = -enemy.xdirection;
+    } else {
+        enemy.x = newXPos;
+    }
+    var newYPos = enemy.y + enemy.ydirection * enemy.speed * modifier;
+    if (newYPos < boundaries.getTopBoundary(enemy)) {
+       enemy.y = boundaries.getTopBoundary(enemy);
+      enemy.ydirection = -enemy.ydirection;
+   } else if (newYPos > boundaries.getBottomBoundary(enemy)) {
+         enemy.y = boundaries.getBottomBoundary(enemy);
+      enemy.ydirection = -enemy.ydirection;
+   } else {
+        enemy.y = newYPos;
+   }
+}
 
-window.addEventListener("keydown", function (e) {
-    keysDown[e.keyCode] = true;
-}, false);
+var updateBullets = function(modifier) {
+    for (var i = 0; i < bullets.length; ++i) {
+        bullets[i].x += bullets[i].stepX() * modifier;
+        bullets[i].y += bullets[i].stepY() * modifier;
 
-window.addEventListener("keyup", function (e) {
-    delete keysDown[e.keyCode];
-}, false);
+        var didHitMonster = false;
+
+        for (var j = 0; j < monsters.length; j++) {
+            if (
+                bullets[i].x <= (monsters[j].x + 32)
+                && monsters[j].x <= (bullets[i].x + 32)
+                && bullets[i].y <= (monsters[j].y + 32)
+                && monsters[j].y <= (bullets[i].y + 32)
+            ) {
+                //Store monsters caught
+                scoreboard.addPoint();
+                  monsters.splice(j, 1);
+                didHitMonster = true;
+            }
+        }
+
+        if (isOffscreen(bullets[i]) || didHitMonster) {
+            bullets.splice(i, 1);
+        }
+    }
+}
+
+var drawBullet = function (bullet) {
+    ctx.translate(bullet.x, bullet.y);
+    ctx.rotate(bullet.angle);
+    ctx.drawImage(bulletImage, -bulletImage.width/2, -bulletImage.height/2);
+    ctx.rotate(-bullet.angle);
+    ctx.translate(-bullet.x, -bullet.y);
+}
+
+var moveSpriteX = function(sprite, newXPos) {
+    if (newXPos < boundaries.getLeftBoundary(sprite)) {
+        sprite.x = boundaries.getLeftBoundary(sprite);
+    } else if (newXPos > boundaries.getRightBoundary(sprite)) {
+        sprite.x = boundaries.getRightBoundary(sprite);
+    } else {
+        sprite.x = newXPos;
+    }
+}
+
+var moveSpriteY = function(sprite, newYPos) {
+   if (newYPos < boundaries.getTopBoundary(sprite)) {
+       sprite.y = boundaries.getTopBoundary(sprite);
+   } else if (newYPos > boundaries.getBottomBoundary(sprite)) {
+         sprite.y = boundaries.getBottomBoundary(sprite);
+   } else {
+       sprite.y = newYPos;
+   }
+}
+
+var moveSpriteToTarget = function(sprite, stepSize, destination) {
+  var angle = calculateAngle(destination, sprite);
+  var stepY = Math.sin(angle) * stepSize;
+  var stepX = Math.cos(angle) * stepSize;
+
+  var nextXPos = sprite.x + stepX;
+  var nextYPos = sprite.y + stepY;
+
+  // If the distance to the destination is shorter than the step, go there.
+  if (stepSize > Math.abs(destination.y - sprite.y)) {
+      nextYPos = destination.y;
+  }
+  if (stepSize > Math.abs(destination.x - sprite.x)) {
+      nextXPos = destination.x;
+  }
+
+  // If the cursor is on the sprite, don't move it.
+  if (destination.x - sprite.width/2 > sprite.x - sprite.width/2 && destination.x < sprite.x + sprite.width/2) {
+      nextXPos = sprite.x;
+  }
+  if (destination.y - sprite.width/2 > sprite.y - sprite.height/2 && destination.y < sprite.y + sprite.height/2) {
+      nextYPos = sprite.y;
+  }
+
+  moveSpriteX(sprite, nextXPos);
+  moveSpriteY(sprite, nextYPos);
+};
+
+/*
+ *  GAME MANAGEMENT
+ */
 
 // Reset the game when the player dies
 var newGame = function () {
@@ -215,112 +426,6 @@ var update = function (modifier) {
 
 };
 
-
-var moveMonster = function(enemy, modifier){
-    var newXPos = enemy.x + enemy.xdirection * enemy.speed * modifier;
-    if (newXPos < boundaries.getLeftBoundary(enemy)) {
-        enemy.x = boundaries.getLeftBoundary(enemy);
-        enemy.xdirection = -enemy.xdirection;
-    } else if (newXPos > boundaries.getRightBoundary(enemy)) {
-        enemy.x = boundaries.getRightBoundary(enemy);
-        enemy.xdirection = -enemy.xdirection;
-    } else {
-        enemy.x = newXPos;
-    }
-    var newYPos = enemy.y + enemy.ydirection * enemy.speed * modifier;
-    if (newYPos < boundaries.getTopBoundary(enemy)) {
-       enemy.y = boundaries.getTopBoundary(enemy);
-      enemy.ydirection = -enemy.ydirection;
-   } else if (newYPos > boundaries.getBottomBoundary(enemy)) {
-         enemy.y = boundaries.getBottomBoundary(enemy);
-      enemy.ydirection = -enemy.ydirection;
-   } else {
-        enemy.y = newYPos;
-   }
-}
-
-var moveSpriteToTarget = function(sprite, stepSize, destination) {
-  var angle = calculateAngle(destination, sprite);
-  var stepY = Math.sin(angle) * stepSize;
-  var stepX = Math.cos(angle) * stepSize;
-
-  var nextXPos = sprite.x + stepX;
-  var nextYPos = sprite.y + stepY;
-
-  // If the distance to the destination is shorter than the step, go there.
-  if (stepSize > Math.abs(destination.y - sprite.y)) {
-      nextYPos = destination.y;
-  }
-  if (stepSize > Math.abs(destination.x - sprite.x)) {
-      nextXPos = destination.x;
-  }
-
-  // If the cursor is on the sprite, don't move it.
-  if (destination.x - sprite.width/2 > sprite.x - sprite.width/2 && destination.x < sprite.x + sprite.width/2) {
-      nextXPos = sprite.x;
-  }
-  if (destination.y - sprite.width/2 > sprite.y - sprite.height/2 && destination.y < sprite.y + sprite.height/2) {
-      nextYPos = sprite.y;
-  }
-
-  moveSpriteX(sprite, nextXPos);
-  moveSpriteY(sprite, nextYPos);
-};
-
-var updateBullets = function(modifier) {
-    for (var i = 0; i < bullets.length; ++i) {
-        bullets[i].x += bullets[i].stepX() * modifier;
-        bullets[i].y += bullets[i].stepY() * modifier;
-
-        var didHitMonster = false;
-
-        for (var j = 0; j < monsters.length; j++) {
-            if (
-                bullets[i].x <= (monsters[j].x + 32)
-                && monsters[j].x <= (bullets[i].x + 32)
-                && bullets[i].y <= (monsters[j].y + 32)
-                && monsters[j].y <= (bullets[i].y + 32)
-            ) {
-                //Store monsters caught
-                scoreboard.addPoint();
-                  monsters.splice(j, 1);
-                didHitMonster = true;
-            }
-        }
-
-        if (isOffscreen(bullets[i]) || didHitMonster) {
-            bullets.splice(i, 1);
-        }
-    }
-}
-
-var isOffscreen = function(sprite) {
-  if (sprite.x < 0 || sprite.x > canvas.width || sprite.y < 0 || sprite.y > canvas.height) {
-      return true;
-  }
-  return false;
-}
-
-var moveSpriteX = function(sprite, newXPos) {
-    if (newXPos < boundaries.getLeftBoundary(sprite)) {
-        sprite.x = boundaries.getLeftBoundary(sprite);
-    } else if (newXPos > boundaries.getRightBoundary(sprite)) {
-        sprite.x = boundaries.getRightBoundary(sprite);
-    } else {
-        sprite.x = newXPos;
-    }
-}
-
-var moveSpriteY = function(sprite, newYPos) {
-   if (newYPos < boundaries.getTopBoundary(sprite)) {
-       sprite.y = boundaries.getTopBoundary(sprite);
-   } else if (newYPos > boundaries.getBottomBoundary(sprite)) {
-         sprite.y = boundaries.getBottomBoundary(sprite);
-   } else {
-       sprite.y = newYPos;
-   }
-}
-
 // Draw everything
 var render = function () {
     //reset canvas size if browser has been resized
@@ -363,57 +468,6 @@ var render = function () {
     ctx.fillText("Cumulative Score: " + scoreboard.getCumulativeScore(), 36, canvas.height-36);
 };
 
-var scoreboard = {
-  getHighScore: function() {
-      if (!localStorage.highScore) {
-          localStorage.highScore = 0;
-      }
-      return localStorage.highScore;
-  },
-
-  getCurrentScore: function() {
-    if (!localStorage.currentScore) {
-        localStorage.currentScore = 0;
-    }
-      return localStorage.currentScore;
-  },
-
-  getCumulativeScore: function() {
-      if (!localStorage.cumulativeScore) {
-          localStorage.cumulativeScore = 0;
-      }
-      return localStorage.cumulativeScore;
-  },
-
-  addPoint: function() {
-      if (!localStorage.currentScore) {
-          localStorage.currentScore = 0;
-      }
-      if (!localStorage.cumulativeScore) {
-          localStorage.cumulativeScore = 0;
-      }
-      ++localStorage.cumulativeScore;
-      ++localStorage.currentScore;
-
-
-      if (localStorage.highScore < localStorage.currentScore) {
-          localStorage.highScore = localStorage.currentScore;
-      }
-  },
-
-  resetGame: function() {
-      localStorage.currentScore = 0;
-  }
-}
-
-var drawBullet = function (bullet) {
-    ctx.translate(bullet.x, bullet.y);
-    ctx.rotate(bullet.angle);
-    ctx.drawImage(bulletImage, -bulletImage.width/2, -bulletImage.height/2);
-    ctx.rotate(-bullet.angle);
-    ctx.translate(-bullet.x, -bullet.y);
-}
-
 // The main game loop
 var main = function () {
     var now = Date.now();
@@ -428,28 +482,6 @@ var main = function () {
     requestAnimationFrame(main);
 };
 
-window.addEventListener('mousedown', function(event) {
-    var downCount = ++mouseState.downCount;
-    setTimeout(function() {
-        if (mouseState.isDown() && downCount == mouseState.downCount) {
-            console.log("holding!");
-            mouseState.isHold = true;
-        }
-    }, 200);
-});
-
-window.addEventListener('mousemove', function(event) {
-    mouseState.x = event.x;
-    mouseState.y = event.y;
-});
-
-window.addEventListener('mouseup', function(event) {
-  ++mouseState.upCount;
-  if (!mouseState.isHold) {
-      hero.fireBullet({x: event.x, y: event.y});
-  }
-  mouseState.isHold = false;
-});
 
 var w = window;
 requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
