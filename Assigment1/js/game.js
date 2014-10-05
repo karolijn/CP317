@@ -1,5 +1,3 @@
-var BULLET_SPEED = 50;
-
 var mouseState = {
 	x: 0,
 	y: 0,
@@ -23,6 +21,8 @@ var boundaries = {
     	return canvas.width - sprite.width/2;
     }
 }
+
+var monsters = [];
 
 // Create the canvas
 var canvas = document.createElement("canvas");
@@ -123,9 +123,6 @@ var calculateAngle = function (destination, source) {
     return angle;
 }
 
-var monsters = [];
-var monstersCaught = 0;
-
 
 var addGoblin = function () {
 	var newMonster = new Monster();
@@ -165,9 +162,8 @@ var newGame = function () {
 	hero.x = canvas.width / 2;
 	hero.y = canvas.height / 2;
 	
-	//alert("New Game!");
+	scoreboard.resetGame();
 
-	monstersCaught = 0;
 	monsters = [];
 	bullets = [];
 
@@ -277,7 +273,8 @@ var updateBullets = function(modifier) {
 				&& bullets[i].y <= (monsters[j].y + 32)
 				&& monsters[j].y <= (bullets[i].y + 32)
 			) {
-				++monstersCaught;
+				//Store monsters caught
+                scoreboard.addPoint();
 		   		monsters.splice(j, 1);
 				didHitMonster = true;
 			}
@@ -323,7 +320,7 @@ var render = function () {
 	canvas.height = window.innerHeight/2;
 
 	if (bgReady) {
-		ctx.drawImage(bgImage, 0, 0,window.innerWidth/2,window.innerHeight/2);
+		ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
 	}
 
 	if (heroReady) {
@@ -344,11 +341,62 @@ var render = function () {
 
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
-	ctx.font = "24px Helvetica";
+	ctx.font = "13px Helvetica";
 	ctx.textAlign = "left";
+	ctx.textBaseline = "bottom";
+	ctx.fillText("Score: " + scoreboard.getCurrentScore(), 36, 36);
+
+    ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.textBaseline = "top";
-	ctx.fillText("Goblins caught: " + monstersCaught, 32, 32);
+	ctx.textAlign = "right";
+	ctx.fillText("High Score: " + scoreboard.getHighScore(), canvas.width - 36, canvas.height-36);
+	
+	ctx.textAlign = "left";
+	ctx.fillText("Cumulative Score: " + scoreboard.getCumulativeScore(), 36, canvas.height-36);
 };
+
+var scoreboard = {
+  getHighScore: function() {
+  	if (!localStorage.highScore) {
+  		localStorage.highScore = 0;
+  	}
+  	return localStorage.highScore;
+  },
+  	
+  getCurrentScore: function() {
+    if (!localStorage.currentScore) {
+        localStorage.currentScore = 0;
+    }
+      return localStorage.currentScore;
+  },
+
+  getCumulativeScore: function() {
+  	if (!localStorage.cumulativeScore) {
+  		localStorage.cumulativeScore = 0;
+  	}
+  	return localStorage.cumulativeScore;
+  },
+
+  addPoint: function() {
+      if (!localStorage.currentScore) {
+      	localStorage.currentScore = 0;
+      }
+      if (!localStorage.cumulativeScore) {
+      	localStorage.cumulativeScore = 0;
+      }
+      ++localStorage.cumulativeScore;
+      ++localStorage.currentScore;
+
+
+      if (localStorage.highScore < localStorage.currentScore) {
+      	localStorage.highScore = localStorage.currentScore;
+      }
+  },
+
+  resetGame: function() {
+  	localStorage.currentScore = 0;
+  }
+}
 
 var drawBullet = function (bullet) {
     ctx.translate(bullet.x, bullet.y);
