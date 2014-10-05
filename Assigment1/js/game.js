@@ -1,4 +1,4 @@
-var BULLET_SPEED = 200;
+var BULLET_SPEED = 50;
 
 var mouseState = {
 	x: 0,
@@ -6,8 +6,23 @@ var mouseState = {
 	isHold: false,
 	downCount: 0,
 	upCount: 0,
-	isDown: function() {return this.downCount != this.upCount;}
+	isDown: function() {return this.downCount > this.upCount;},
 };
+
+var boundaries = {
+    getTopBoundary: function(sprite) {
+        return 0 + sprite.height/2;
+    },
+    getBottomBoundary: function(sprite) {
+    	return canvas.height - sprite.height/2;
+    },
+    getLeftBoundary: function(sprite) {
+    	return 0 + sprite.width/2;
+    },
+    getRightBoundary: function(sprite) {
+    	return canvas.width - sprite.width/2;
+    }
+}
 
 // Create the canvas
 var canvas = document.createElement("canvas");
@@ -57,19 +72,36 @@ var hero = {
 	height: 32,
 	width: 32,
 	fireBullet: function(direction) {
-        var angle = calculateAngle(direction, hero)
-        var stepY = Math.sin(angle);
-        var stepX = Math.cos(angle);
-        var newBullet = {
-        	stepX: stepX,
-        	stepY: stepY,
-        	x: hero.x,
-        	y: hero.y,
-        	angle: angle
-        };
+        var newBullet = new Bullet();
+        newBullet.angle = calculateAngle(direction, hero);
+        newBullet.x = hero.x;
+        newBullet.y = hero.y;
         bullets.push(newBullet);
 	}
 };
+
+function Monster() {
+	this.speed = 256;
+	this.height = monsterImage.height;
+	this.width = monsterImage.width;
+	this.xdirection = 0;
+	this.ydirection = 0;
+};
+
+function Bullet() {
+    this.speed = 600;
+    this.height = bulletImage.height;
+    this.width = bulletImage.width;
+    this.angle = 0;
+    this.stepY = function() {
+    	return Math.sin(this.angle) * this.speed;
+    };
+    this.stepX = function() {
+    	return Math.cos(this.angle) * this.speed;
+    };
+    this.x = 0;
+    this.y = 0;
+}
 
 // Given a sprite with coordinates in the top left corner,
 // return the coordinates of the centre of the sprite.
@@ -77,21 +109,12 @@ var centerCoordinates = function(sprite) {
     return {x: sprite.x + (sprite.width/2), y: sprite.y + (sprite.height/2)};
 }
 
-function Monster() {
-	this.speed = 256;
-	this.height = 32;
-	this.width = 32;
-	this.xdirection = 0;
-	this.ydirection = 0;
-};
-
 var calculateAngle = function (destination, source) {
-    var deltaY = destination.y - centerCoordinates(source).y;
-    var deltaX = destination.x - centerCoordinates(source).x;
+    var deltaY = destination.y - source.y;
+    var deltaX = destination.x - source.x;
 
     var angle = Math.atan(deltaY / deltaX);
     if (deltaX < 0 && deltaY <= 0) {
-        console.log(angle);
         angle -= Math.PI;
     }
     if (deltaX < 0 && deltaY > 0) {
@@ -106,38 +129,43 @@ var monstersCaught = 0;
 
 var addGoblin = function () {
 	var newMonster = new Monster();
+    
+    // Get random x coord between left and right boundaries.
+	newMonster.x = Math.floor(Math.random() *
+		boundaries.getRightBoundary(newMonster) - boundaries.getLeftBoundary(newMonster)) +
+	        boundaries.getLeftBoundary(newMonster);
 
-	newMonster.x = 32 + (Math.random() * (canvas.width - 64));
-	newMonster.y = 32 + (Math.random() * (canvas.height - 64));
+    // Get random y coord between top and bottom boundaries.
+	newMonster.y = Math.floor(Math.random() *
+		boundaries.getBottomBoundary(newMonster) - boundaries.getTopBoundary(newMonster)) +
+	        boundaries.getTopBoundary(newMonster);
 	
 	newMonster.xdirection = (Math.random() * 2) - 1;
 	newMonster.ydirection = (Math.random() * 2) - 1;
 
 	ctx.drawImage(monsterImage, newMonster.x, newMonster.y);
 	monsters.push(newMonster);
-
 };
 
 // Handle keyboard controls
 var keysDown = {};
 
-addEventListener("keydown", function (e) {
+window.addEventListener("keydown", function (e) {
 	keysDown[e.keyCode] = true;
 }, false);
 
-addEventListener("keyup", function (e) {
+window.addEventListener("keyup", function (e) {
 	delete keysDown[e.keyCode];
 }, false);
 
 // Reset the game when the player dies
 var newGame = function () {
 	keysDown = {};
-	mouseState.isHold = false;
 
 	hero.x = canvas.width / 2;
 	hero.y = canvas.height / 2;
 	
-	alert("New Game!");
+	//alert("New Game!");
 
 	monstersCaught = 0;
 	monsters = [];
@@ -186,21 +214,21 @@ var update = function (modifier) {
 
 var moveMonster = function(enemy, modifier){
 	var newXPos = enemy.x + enemy.xdirection * enemy.speed * modifier;
-	if (newXPos < 0) {
-        enemy.x = 0;
+	if (newXPos < boundaries.getLeftBoundary(enemy)) {
+        enemy.x = boundaries.getLeftBoundary(enemy);
 		enemy.xdirection = -enemy.xdirection;
-    } else if (newXPos > canvas.width - enemy.width) {
-    	enemy.x = canvas.width - enemy.width;
+    } else if (newXPos > boundaries.getRightBoundary(enemy)) {
+    	enemy.x = boundaries.getRightBoundary(enemy);
 		enemy.xdirection = -enemy.xdirection;
     } else {
         enemy.x = newXPos;
     }
 	var newYPos = enemy.y + enemy.ydirection * enemy.speed * modifier;
-	if (newYPos < 0) {
-       enemy.y = 0;
+	if (newYPos < boundaries.getTopBoundary(enemy)) {
+       enemy.y = boundaries.getTopBoundary(enemy);
 	   enemy.ydirection = -enemy.ydirection;
-   } else if (newYPos > canvas.height - enemy.height) {
-   	   enemy.y = canvas.height - enemy.height;
+   } else if (newYPos > boundaries.getBottomBoundary(enemy)) {
+   	   enemy.y = boundaries.getBottomBoundary(enemy);
 	   enemy.ydirection = -enemy.ydirection;
    } else {
 		enemy.y = newYPos;
@@ -208,22 +236,27 @@ var moveMonster = function(enemy, modifier){
 }
 
 var moveSpriteToTarget = function(sprite, stepSize, destination) {
-  var deltaY = destination.y - sprite.y;
-  var deltaX = destination.x - sprite.x;
-
-  var angle = deltaX == 0 ? 0 : Math.atan(deltaY / deltaX);
+  var angle = calculateAngle(destination, sprite);
   var stepY = Math.sin(angle) * stepSize;
-  var stepX = Math.cos(angle) * stepSize
+  var stepX = Math.cos(angle) * stepSize;
 
-  var nextXPos = deltaX < 0 ? sprite.x - stepX : sprite.x + stepX;
-  var nextYPos = deltaX < 0 ? sprite.y - stepY : sprite.y + stepY;
+  var nextXPos = sprite.x + stepX;
+  var nextYPos = sprite.y + stepY;
 
   // If the distance to the destination is shorter than the step, go there.
-  if (Math.abs(nextYPos - sprite.y) > Math.abs(destination.y - sprite.y)) {
+  if (stepSize > Math.abs(destination.y - sprite.y)) {
       nextYPos = destination.y;
   }
-  if (Math.abs(nextXPos - sprite.x) > Math.abs(destination.x - sprite.x)) {
+  if (stepSize > Math.abs(destination.x - sprite.x)) {
       nextXPos = destination.x;
+  }
+
+  // If the cursor is on the sprite, don't move it.
+  if (destination.x - sprite.width/2 > sprite.x - sprite.width/2 && destination.x < sprite.x + sprite.width/2) {
+  	nextXPos = sprite.x;
+  }
+  if (destination.y - sprite.width/2 > sprite.y - sprite.height/2 && destination.y < sprite.y + sprite.height/2) {
+  	nextYPos = sprite.y;
   }
 
   moveSpriteX(sprite, nextXPos);
@@ -232,8 +265,8 @@ var moveSpriteToTarget = function(sprite, stepSize, destination) {
 
 var updateBullets = function(modifier) {
     for (var i = 0; i < bullets.length; ++i) {
-        bullets[i].x += bullets[i].stepX * BULLET_SPEED * modifier;
-        bullets[i].y += bullets[i].stepY * BULLET_SPEED * modifier;
+        bullets[i].x += bullets[i].stepX() * modifier;
+        bullets[i].y += bullets[i].stepY() * modifier;
         
         var didHitMonster = false;
 
@@ -264,20 +297,20 @@ var isOffscreen = function(sprite) {
 }
 
 var moveSpriteX = function(sprite, newXPos) {
-    if (newXPos < 0) {
-        sprite.x = 0;
-    } else if (newXPos > canvas.width - sprite.width) {
-    	sprite.x = canvas.width - sprite.width;
+    if (newXPos < boundaries.getLeftBoundary(sprite)) {
+        sprite.x = boundaries.getLeftBoundary(sprite);
+    } else if (newXPos > boundaries.getRightBoundary(sprite)) {
+    	sprite.x = boundaries.getRightBoundary(sprite);
     } else {
         sprite.x = newXPos;
     }
 }
 
 var moveSpriteY = function(sprite, newYPos) {
-   if (newYPos < 0) {
-       sprite.y = 0;
-   } else if (newYPos > canvas.height - sprite.height) {
-   	   sprite.y = canvas.height - sprite.height;
+   if (newYPos < boundaries.getTopBoundary(sprite)) {
+       sprite.y = boundaries.getTopBoundary(sprite);
+   } else if (newYPos > boundaries.getBottomBoundary(sprite)) {
+   	   sprite.y = boundaries.getBottomBoundary(sprite);
    } else {
    	sprite.y = newYPos;
    }
@@ -294,12 +327,12 @@ var render = function () {
 	}
 
 	if (heroReady) {
-		ctx.drawImage(heroImage, hero.x, hero.y);
+		ctx.drawImage(heroImage, hero.x - heroImage.width/2, hero.y - heroImage.height/2);
 	}
 
 	if (monsterReady) {
 		for (var j = 0; j < monsters.length; j++) {
-			ctx.drawImage(monsterImage, monsters[j].x, monsters[j].y);
+			ctx.drawImage(monsterImage, monsters[j].x - monsterImage.width/2, monsters[j].y - monsterImage.height/2);
 		}
 	}
 
@@ -318,12 +351,11 @@ var render = function () {
 };
 
 var drawBullet = function (bullet) {
-    ctx.translate(bullet.x + bulletImage.width/2, bullet.y + bulletImage.height/2);
+    ctx.translate(bullet.x, bullet.y);
 	ctx.rotate(bullet.angle);
-	console.log(bulletImage.width)
 	ctx.drawImage(bulletImage, -bulletImage.width/2, -bulletImage.height/2);
 	ctx.rotate(-bullet.angle);
-	ctx.translate(-(bullet.x + bulletImage.width/2), -(bullet.y + bulletImage.height/2));
+	ctx.translate(-bullet.x, -bullet.y);
 }
 
 // The main game loop
@@ -342,11 +374,12 @@ var main = function () {
 
 window.addEventListener('mousedown', function(event) {
 	var downCount = ++mouseState.downCount;
-
     setTimeout(function() {
-    	if (mouseState.isDown() && mouseState.downCount == downCount) {
-    		mouseState.isHold = true; }
-    	}, 200);
+    	if (mouseState.isDown() && downCount == mouseState.downCount) {
+    		console.log("holding!");
+    		mouseState.isHold = true;
+    	}
+    }, 200);
 });
 
 window.addEventListener('mousemove', function(event) {
@@ -356,12 +389,10 @@ window.addEventListener('mousemove', function(event) {
 
 window.addEventListener('mouseup', function(event) {
   ++mouseState.upCount;
-  if (mouseState.isHold) {
-  	mouseState.isHold = false;
-  	return;
-  } else {
+  if (!mouseState.isHold) {
   	hero.fireBullet({x: event.x, y: event.y});
   }
+  mouseState.isHold = false;
 });
 
 var w = window;
