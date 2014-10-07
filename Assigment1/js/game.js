@@ -138,6 +138,7 @@ var isOffscreen = function(sprite) {
  */
 var monsters = [];
 var bullets = [];
+var goblinInterval = null;
 
 function Monster() {
     this.speed = 256;
@@ -382,6 +383,7 @@ var newGame = function () {
     backgroundMusic.volume = 0.35;
     backgroundMusic.play();
     keysDown = {};
+    goblinInterval = setInterval(addGoblin,3000);
 
     hero.x = canvas.width / 2;
     hero.y = canvas.height / 2;
@@ -426,6 +428,8 @@ var update = function (modifier) {
             && monsters[i].y <= (hero.y + 32)
         ) {
             backgroundMusic.pause();
+            monsters = [];
+            clearInterval(goblinInterval);
             gameOverSound.play();
             gameOverSound.addEventListener('ended', newGame);
         }
@@ -496,5 +500,4 @@ requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame
 // Let's play this game!
 var then = Date.now();
 newGame();
-setInterval(addGoblin,3000);
 main();
