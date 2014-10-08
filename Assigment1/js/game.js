@@ -17,7 +17,7 @@ document.body.appendChild(canvas);
  */
 
 var fireSound = new Audio("audio/shot.wav");
-var backgroundMusic = new Audio("audio/POL-cactus-land-short.wav");
+var backgroundMusic = new Audio("audio/LoZGerudoValleyTheme.mp3");
 var gameOverSound = new Audio("audio/gameOver.wav");
 var scream = new Audio("audio/scream.mp3");
 
