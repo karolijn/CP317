@@ -1,4 +1,10 @@
 /*
+ * Group 2
+ * Assignment 1
+ * Carolyn Marshall, Jack Cohen, Jordan Saadon
+ */
+
+/*
  * ENVIRONMENT
  */
 
