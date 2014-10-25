@@ -42,4 +42,4 @@ var app = {
     }
 };
 
-//app.initialize();
+app.initialize();
