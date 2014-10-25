@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="ca.wlu.g2a2" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>G2A2</name>
+    <description>
+        Assignment 2, Group 2
+    </description>
+    <author email="" href="http://cordova.io">
+        Carolyn Marshall, Jack Cohen, Jordan Saadon
+    </author>
+    <content src="group.html" />
+    <access origin="*" />
+</widget>
