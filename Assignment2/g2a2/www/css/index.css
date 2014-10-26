@@ -93,3 +93,39 @@ h1 {
 .main-content {
     text-align: center;
 }
+
+#work:after {
+    background: url('../img/181-hammer-icon.png') 50% 50% no-repeat;
+    background-size: 24px 22px;
+}
+
+#about:after {
+    background: url('../img/111-user-icon.png') 50% 50% no-repeat;
+    background-size: 24px 22px;
+}
+
+#hobby:after {
+    background: url('../img/88-beermug.png') 50% 50% no-repeat;
+    background-size: 22px 27px;
+}
+
+.member-navbar .ui-btn .ui-btn-inner {
+    padding-top: 40px !important;
+}
+
+.member-navbar .ui-icon {
+    width: 30px!important;
+    height: 30px!important;
+    margin-left: -15px !important;
+}
+
+.member-navbar .ui-btn .ui-icon {
+    width: 30px!important;
+    height: 30px!important;
+    margin-left: -15px !important;
+    box-shadow: none!important;
+    -moz-box-shadow: none!important;
+    -webkit-box-shadow: none!important;
+    -webkit-border-radius: 0 !important;
+    border-radius: 0 !important;
+}

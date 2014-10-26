@@ -26,7 +26,9 @@
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
         <link rel="stylesheet" type="text/css" href="css/index.css" />
         <link rel="stylesheet" href="js/jquery.mobile-1.4.4/jquery.mobile-1.4.4.css" />
-        <title>Hello World</title>
+        <script src="js/jquery-1.11.1.min.js"></script>
+        <script src="js/jquery.mobile-1.4.4/jquery.mobile-1.4.4.js"></script>
+        <title>Hello Laurier</title>
     </head>
     <body>
         <div data-role="page" id="home" class="type-interior ui-page ui-body-c">
@@ -37,18 +39,10 @@
             <div role="main" class="ui-content main-content">
                 <h2>CP317 Project Group Information</h2>
                 <p>Click on the image</p>
-                <img src="img/portal.png" onClick="enterSite()"/>
+                <img src="img/portal.png" onClick="navigateTo('group.html')"/>
             </div><!-- /content -->
         </div>
-
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
-        <script src="js/jquery-1.11.1.min.js"></script>
-        <script src="js/jquery.mobile-1.4.4/jquery.mobile-1.4.4.js"></script>
-        <script>
-            var enterSite = function() {
-                $.mobile.pageContainer.pagecontainer("change", "group.html");
-            };
-        </script>
     </body>
 </html>

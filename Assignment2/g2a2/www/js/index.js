@@ -37,4 +37,8 @@ var app = {
     }
 };
 
+var navigateTo = function(dest) {
+    $.mobile.pageContainer.pagecontainer("change", dest);
+};
+
 app.initialize();

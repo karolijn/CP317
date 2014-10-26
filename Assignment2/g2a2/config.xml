@@ -9,5 +9,6 @@
     </author>
     <content src="index.html" />
     <content src="group.html" />
+    <content src="carolyn.html" />
     <access origin="*" />
 </widget>
