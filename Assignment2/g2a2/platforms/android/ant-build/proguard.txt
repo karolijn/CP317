@@ -1,3 +1,0 @@
-# view AndroidManifest.xml #generated:6
--keep class ca.wlu.g2a2.CordovaApp { <init>(...); }
-
