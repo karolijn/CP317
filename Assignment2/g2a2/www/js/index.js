@@ -57,7 +57,11 @@ var data = {
 };
 
 var navigateTo = function(dest) {
-    $.mobile.pageContainer.pagecontainer("change", dest);
+    if (dest == "group.html" || dest == "index.html") {
+        $.mobile.pageContainer.pagecontainer("change", dest, { transition: "slide" });
+    } else {
+        $.mobile.pageContainer.pagecontainer("change", dest, { transition: "slideup" });
+    }
 };
 
 var showInfo = function(section,member) {
