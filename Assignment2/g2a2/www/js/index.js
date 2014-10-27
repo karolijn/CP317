@@ -56,12 +56,22 @@ var data = {
     }
 };
 
-var navigateTo = function(dest) {
-    if (dest == "group.html" || dest == "index.html") {
-        $.mobile.pageContainer.pagecontainer("change", dest, { transition: "slide" });
-    } else {
-        $.mobile.pageContainer.pagecontainer("change", dest, { transition: "slideup" });
+var navigateTo = function(dest, options) {
+    // changeHash option is implemented for bonus marks. Replaces the page content without updating the
+    // navigation history.
+    changeOptions = {};
+    if (typeof options != 'undefined') {
+        if (typeof options['changeHash'] != 'undefined') {
+            changeOptions['changeHash'] = options['changeHash'];
+        }
     }
+
+    if (dest == "group.html" || dest == "index.html") {
+        changeOptions['transition'] = "slide";
+    } else {
+        changeOptions['transition'] = "slideup";
+    }
+    $.mobile.pageContainer.pagecontainer("change", dest, changeOptions);
 };
 
 var showInfo = function(section,member) {

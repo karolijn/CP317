@@ -94,21 +94,24 @@ h1 {
     text-align: center;
 }
 
-#work:after {
+.work-link:after {
     background: url('../img/181-hammer-icon.png') 50% 50% no-repeat;
     background-size: 24px 22px;
 }
 
-#about:after {
+.about-link:after {
     background: url('../img/111-user-icon.png') 50% 50% no-repeat;
     background-size: 24px 22px;
 }
 
-#hobby:after {
+.hobby-link:after {
     background: url('../img/88-beermug.png') 50% 50% no-repeat;
     background-size: 22px 27px;
 }
 
+.member-navbar .ui-btn:after {
+    background-color: transparent;
+}
 .member-navbar .ui-btn .ui-btn-inner {
     padding-top: 40px !important;
 }
@@ -129,3 +132,4 @@ h1 {
     -webkit-border-radius: 0 !important;
     border-radius: 0 !important;
 }
+
