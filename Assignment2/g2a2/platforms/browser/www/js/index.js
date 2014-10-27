@@ -73,40 +73,10 @@ var navigateTo = function(dest, options) {
     }
     $.mobile.pageContainer.pagecontainer("change", dest, changeOptions);
 };
-/*
-// update persistant navbar for about pages.
-$(function() {
-    $( "[data-role='navbar']" ).navbar();
-    $( "[data-role='header'], [data-role='footer']" ).toolbar();
-});
 
-// Update the contents of the toolbars
-$( document ).on( "pageshow", "[data-role='page']", function() {
-    // Get the current page title.
-    var current = $( this ).jqmData( "title" );
-    // Remove the active indicator from the navbar.
-    $( "[data-role='navbar'] a.ui-btn-active" ).removeClass( "ui-btn-active" );
-    // Add active class to current nav button
-    $( "[data-role='navbar'] a" ).each(function() {
-        if ( $( this ).text() === current ) {
-            $( this ).addClass( "ui-btn-active" );
-        }
-    });
+var showInfo = function(section,member) {
+    $(".info").html(data[member][section]);
+}; //This function causes the innerHTML of the page to change (using the html() jquery function).
+//Therefore the page is not reloaded and clicking the back button will go to the group page, not the last tab chosen
 
-    // Don't let the framework replace the document.title with the page-title.
-    $(":jqmData(role='page')").attr("data-title", document.title);
-});
-
-$( document ).on( "pageshow", "[data-role='footer']", function() {
-    debugger;
-});
--->*/
-
-$(document).on('pagebeforeshow', '#index', function(){
-    debugger;
-});
-
-$(document).on('pageshow', '#index', function(){
-    debugger;
-});
 app.initialize();

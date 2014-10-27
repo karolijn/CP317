@@ -133,3 +133,20 @@ h1 {
     border-radius: 0 !important;
 }
 
+.header-text:before {
+    content: '';
+    background-size: 20px auto;
+    display: block;
+    background-repeat: no-repeat;
+    width: 20px;
+    height: 20px;
+    float: left;
+    margin: 0;
+    position: relative;
+    left: 157px;
+    padding: 0;
+}
+
+.header-text.carolyn:before {
+    background-image: url('../img/carolyn.jpg');
+}
