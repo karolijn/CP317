@@ -2,13 +2,12 @@
 <widget id="ca.wlu.g2a2" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>G2A2</name>
     <description>
-        A sample Apache Cordova application that responds to the deviceready event.
+        Assignment 2 for Group 2 of CP317.
     </description>
-    <author email="dev@cordova.apache.org" href="http://cordova.io">
-        Apache Cordova Team
-    </author>
-    <content src="index.html" />
     <content src="group.html" />
     <content src="carolyn.html" />
+    <content src="carolyn-work.html" />
+    <content src="carolyn-hobby.html" />
+    <content src="index.html" />
     <access origin="*" />
 </widget>
