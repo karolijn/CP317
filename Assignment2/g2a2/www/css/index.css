@@ -141,3 +141,18 @@ h1.carolyn-header:before {
     content: " ";
 }
 
+h1.jack-header:before {
+    background: url('../img/jack.jpg') no-repeat;
+    background-size: 20px 20px;
+    padding: 1px 10px;
+    margin-right: 5px;
+    content: " ";
+}
+
+h1.jordan-header:before {
+    background: url('../img/jordan.jpg') no-repeat;
+    background-size: 20px 20px;
+    padding: 1px 10px;
+    margin-right: 5px;
+    content: " ";
+}

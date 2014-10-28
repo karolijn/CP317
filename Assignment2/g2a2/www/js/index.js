@@ -37,25 +37,6 @@ var app = {
     }
 };
 
-
-var data = {
-    carolyn: {
-        about:"This is info about Carolyn.",
-        work:"This is info about Carolyn's work.",
-        hobby:"This is info about Carolyn's hobbies."
-    },
-    jack: {
-        about:"Jack is a third year student at Wilfrid Laurier University majoring in Computer Science and Physics with the Co-op option. He enjoys long walks on the beach, the occasional game of croquet, and sitting by the fire while relaxing to the soothing sounds of Rod Stewart.",
-        work:"Last summer, Jack was an intern at Venngo Inc., working with the back-end developer team. He performed extensive website tests, and created a mobile application used by the sales team for quick access to Venngo sales data.",
-        hobby:"Some of Jack's hobbies include skeet shooting, watching professional trampoline tournaments, following Cirque-du-Soleil around on tour, and playing days of video games at a time (especially Legend of Zelda)."
-    },
-    jordan: {
-        about:"This is info about Jordan.",
-        work:"This is info about Jordan's work.",
-        hobby:"This is info about Jordan's hobbies."
-    }
-};
-
 var navigateTo = function(dest, options) {
     // changeHash option is implemented for bonus marks. Replaces the page content without updating the
     // navigation history.
@@ -73,10 +54,5 @@ var navigateTo = function(dest, options) {
     }
     $.mobile.pageContainer.pagecontainer("change", dest, changeOptions);
 };
-
-var showInfo = function(section,member) {
-    $(".info").html(data[member][section]);
-}; //This function causes the innerHTML of the page to change (using the html() jquery function).
-//Therefore the page is not reloaded and clicking the back button will go to the group page, not the last tab chosen
 
 app.initialize();
