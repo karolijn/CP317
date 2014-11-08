@@ -10,13 +10,13 @@ app = {
             });
         });
 
-        $('#schedule').on('pageinit', function() {
+      /*  $('#schedule').on('pageinit', function() {
             $("#calendar").floatThead({
                 scrollContainer: function ($table) {
                     return $table.closest('#schedule_calendar');
                 }
             });
-        });
+        });*/
 
         $(window).on('resize', function() {
             $('#schedule_calendar').css({
@@ -174,16 +174,19 @@ app = {
                 return new Date(time.getTime() + increment_in_minutes * 60000);
             };
 
-            var table = "<table id='calendar'>"
-            table += '<thead><tr>';
-            table += '<th></th>';
-            table += '<th>Monday</th>';
-            table += '<th>Tuseday</th>';
-            table += '<th>Wednesday</th>';
-            table += '<th>Thursday</th>';
-            table += '<th>Friday</th>';
-            table += '</tr></thead>';
+            var tableHeader = "<table style='table-layout: fixed; width: 100%' id='calendar-header'>"
+            tableHeader += '<thead><tr>';
+            tableHeader += '<th style="min-width: 45px;width: 45px;"></th>';
+            tableHeader += '<th>Monday</th>';
+            tableHeader += '<th>Tuseday</th>';
+            tableHeader += '<th>Wednesday</th>';
+            tableHeader += '<th>Thursday</th>';
+            tableHeader += '<th>Friday</th>';
+            tableHeader += '</tr></thead></table>';
 
+            $(tableHeader).insertBefore(scheduleCalendar);
+
+            var table = '<table style="table-layout: fixed; width: 100%" id="calendar">';
             for(var i = minTime; i < maxTime; i = incrementTime(i, 10)) {
                // console.log(i);
                 var borderClass = '';
@@ -198,7 +201,7 @@ app = {
                     timeLabel = i.getHours() + ":" + i.getMinutes();
                 }
                 table += '<tr>';
-                table += '<td class="' + borderClass + '">';
+                table += '<td style="min-width: 45px; width: 45px" class="' + borderClass + '">';
                 table += timeLabel;
                 table += '</td>';
                // add a cell in 10 minute increments
