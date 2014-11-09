@@ -5,7 +5,7 @@ app = {
         $('#schedule').on('pagebeforecreate', function() {
             app.scheduleControl.initialize();
 
-                        $('#schedule_calendar').css({
+            $('#schedule_calendar').css({
                 height: $(window).height() * 0.5
             });
         });
@@ -135,34 +135,75 @@ app = {
         }
         return JSON.parse(localStorage.getItem(semesterKey));
     },
+    updateScheduleForCurrentSemester: function(schedule) {
+        var semesterKey = app.currentSemester.getKey();
+        localStorage.setItem(semesterKey, JSON.stringify(schedule));
+    },
     scheduleControl: {
-        populateCourseList: function() {
+        addCourseToSchedule: function(courseKey) {
+          var schedule = app.getScheduleForCurrentSemester();
+          schedule.courses[courseKey] = app.currentSemester.courses[courseKey];
 
+          app.updateScheduleForCurrentSemester(schedule);
+          app.scheduleControl.populateCourseList();
+          app.scheduleControl.populateSemesterList();
+          app.scheduleControl.populateSemesterCalendar();
+          $('.course_list').listview("refresh");
+          $('.schedule_list').listview("refresh");
+        },
+        removeCourseFromSchedule: function(courseKey) {
+          var schedule = app.getScheduleForCurrentSemester();
+          delete schedule.courses[courseKey];
+          app.updateScheduleForCurrentSemester(schedule);
+          app.scheduleControl.populateCourseList();
+          app.scheduleControl.populateSemesterList();
+          app.scheduleControl.populateSemesterCalendar();
+          $('.course_list').listview("refresh");
+          $('.schedule_list').listview("refresh");
+        },
+        populateCourseList: function() {
             var courseList = $('.course_list');
 
             if (app.currentSemester == null) {
                 $.mobile.pageContainer.pagecontainer("change", '#home');
             }
+            var schedule = app.getScheduleForCurrentSemester();
+
+            courseList.empty();
             for (var i = 0; i < Object.keys(app.currentSemester.courses).length; ++i) {
                 var course = app.currentSemester.courses[Object.keys(app.currentSemester.courses)[i]];
-                $('.course_list').append('<li><a href="#">' + course.courseTitle + '</a></li>');
+                if(!schedule.courses[course.getKey()]) { // Skip the courses in the schedule.
+                  $('.course_list').append('<li course_key="'+ course.getKey() + '"class="course_list_item"><a href="#">' + course.courseTitle + '</a></li>');
+                }
             }
+
+            $('.course_list_item').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.scheduleControl.addCourseToSchedule(courseKey);
+            });
+
         },
         populateSemesterList: function() {
             var scheduleList = $('.schedule_list');
+            scheduleList.empty();
             var currentSchedule = app.getScheduleForCurrentSemester();
             for (var i = 0; i < Object.keys(currentSchedule.courses).length; ++i) {
-                var course = currentSchedule.courses[Object.keys(currentSchedule.courses)[i]];
-                    scheduleList.append('<li><a href="here">' + course.courseTitle + '</a></li>');
+                var course = app.currentSemester.courses[Object.keys(currentSchedule.courses)[i]];
+                scheduleList.append('<li course_key="'+ course.getKey() + '" class="semester_list_item"><a href="#">' + course.courseTitle + '</a></li>');
             }
 
             if (!currentSchedule.courses || currentSchedule.courses.length == 0) {
                 scheduleList.append('<li><a href="#"></a></li>');
             }
+
+            $('.semester_list_item').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.scheduleControl.removeCourseFromSchedule(courseKey);
+            });
         },
         populateSemesterCalendar: function() {
             var scheduleCalendar = $('#schedule_calendar');
-
+            scheduleCalendar.empty();
             //TODO: get the min and max times
             //TODO: figure out if Sat & Sun need to be displayed
 
@@ -174,17 +215,20 @@ app = {
                 return new Date(time.getTime() + increment_in_minutes * 60000);
             };
 
-            var tableHeader = "<table style='table-layout: fixed; width: 100%' id='calendar-header'>"
-            tableHeader += '<thead><tr>';
-            tableHeader += '<th style="min-width: 45px;width: 45px;"></th>';
-            tableHeader += '<th>Monday</th>';
-            tableHeader += '<th>Tuseday</th>';
-            tableHeader += '<th>Wednesday</th>';
-            tableHeader += '<th>Thursday</th>';
-            tableHeader += '<th>Friday</th>';
-            tableHeader += '</tr></thead></table>';
+            if ($('#calendar-header').size() == 0) {
+                var tableHeader = "<table style='table-layout: fixed; width: 100%' id='calendar-header'>"
+                tableHeader += '<thead><tr>';
+                tableHeader += '<th style="min-width: 45px;width: 45px;"></th>';
+                tableHeader += '<th>Monday</th>';
+                tableHeader += '<th>Tuseday</th>';
+                tableHeader += '<th>Wednesday</th>';
+                tableHeader += '<th>Thursday</th>';
+                tableHeader += '<th>Friday</th>';
+                tableHeader += '</tr></thead></table>';
+                $(tableHeader).insertBefore(scheduleCalendar);
+            }
 
-            $(tableHeader).insertBefore(scheduleCalendar);
+
 
             var table = '<table style="table-layout: fixed; width: 100%" id="calendar">';
             for(var i = minTime; i < maxTime; i = incrementTime(i, 10)) {
