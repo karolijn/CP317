@@ -191,17 +191,16 @@ app = {
                 var course = app.currentSemester.courses[Object.keys(currentSchedule.courses)[i]];
                 scheduleList.append('<li course_key="'+ course.getKey() + '" class="semester_list_item"><a href="#">' + course.courseTitle + '</a></li>');
             }
-
             if (!currentSchedule.courses || currentSchedule.courses.length == 0) {
                 scheduleList.append('<li><a href="#"></a></li>');
             }
-
             $('.semester_list_item').click(function(event) {
                 var courseKey = event.currentTarget.attributes['course_key'].value;
                 app.scheduleControl.removeCourseFromSchedule(courseKey);
             });
         },
         populateSemesterCalendar: function() {
+            var calendarIncrement = 10;
             var scheduleCalendar = $('#schedule_calendar');
             scheduleCalendar.empty();
             //TODO: get the min and max times
@@ -228,10 +227,9 @@ app = {
                 $(tableHeader).insertBefore(scheduleCalendar);
             }
 
-
-
             var table = '<table style="table-layout: fixed; width: 100%" id="calendar">';
-            for(var i = minTime; i < maxTime; i = incrementTime(i, 10)) {
+
+            for(var i = minTime; i < maxTime; i = incrementTime(i, calendarIncrement)) {
                // console.log(i);
                 var borderClass = '';
                 var timeLabel = '';
@@ -244,7 +242,7 @@ app = {
                 } else {
                     timeLabel = i.getHours() + ":" + i.getMinutes();
                 }
-                table += '<tr>';
+                table += '<tr class="' + i.getHours() + i.getMinutes() + '">';
                 table += '<td style="min-width: 45px; width: 45px" class="' + borderClass + '">';
                 table += timeLabel;
                 table += '</td>';
@@ -254,14 +252,35 @@ app = {
                    if (j % 2 == 0) {
                      borderClassColumn += ' table-bg';
                    }
-                   table += '<td class="' + borderClassColumn +'">&nbsp</td>'// class="day' + j + '">a</td>';
+                   table += '<td class="' + borderClassColumn +' day' + j +'">&nbsp</td>';// class="day' + j + '">a</td>';
                 }
                table += "</tr>";
             }
             table += "</table>";
             scheduleCalendar.append(table);
 
+
+            var currentSchedule = app.getScheduleForCurrentSemester();
+            for (var i = 0; i < Object.keys(currentSchedule.courses).length; ++i) {
+                var course = app.currentSemester.courses[Object.keys(currentSchedule.courses)[i]];
+                for (var j = 0; j < course.timeslots.length; ++j) {
+                    var timeslot = course.timeslots[j];
+
+                    var timeBlockStart = app.scheduleControl.timeToDateTime(timeslot.startTime);
+                    var timeBlockEnd = app.scheduleControl.timeToDateTime(timeslot.endTime);
+                    for ( var a = timeBlockStart; a < timeBlockEnd; a = incrementTime(a, calendarIncrement)) {
+                        var timeSelector = 'tr.' + a.getHours() + a.getMinutes() + ' > td.day' + timeslot.day;
+                        $(timeSelector).css({'background-color': 'pink'});
+                    }
+                }
+            }
+
         },
+        timeToDateTime: function(timeString) {
+            timeArray = timeString.split(':');
+            return new Date(0, 0, 0, timeArray[0], timeArray[1], 0, 0);
+        },
+
         initialize: function() {
             this.populateCourseList();
             this.populateSemesterList();
