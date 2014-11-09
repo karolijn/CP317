@@ -30,3 +30,13 @@ body {
 .table-bg {
     background-color: #cfcfcf;
 }
+
+table {
+    border-collapse: collapse;
+}
+
+tr {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}

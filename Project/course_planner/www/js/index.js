@@ -64,20 +64,20 @@ app = {
     },
 
     DAYS: {
-        Monday: 1,
-        Tuesday: 2,
-        Wednesay: 3,
-        Thursday: 4,
-        Friday: 5,
-        Saturday: 6,
-        Sunday: 7
+        Monday: 0,
+        Tuesday: 1,
+        Wednesday: 2,
+        Thursday: 3,
+        Friday: 4,
+        Saturday: 5,
+        Sunday: 6
     },
 
     TERMS: {
-        Winter: 1,
-        Fall: 2,
-        Spring: 3,
-        Summer: 4,
+        Winter: 0,
+        Fall: 1,
+        Spring: 2,
+        Summer: 3,
     },
 
     selectSemesterControl: {
@@ -107,7 +107,7 @@ app = {
             CP213.timeslots.push(new app.Timeslot(app.DAYS.Monday, '8:30', '9:30'));
             CP213.timeslots.push(new app.Timeslot(app.DAYS.Wednesday, '8:30', '9:30'));
             CP213.timeslots.push(new app.Timeslot(app.DAYS.Friday, '8:30', '9:30'));
-            CP213.description = "A class to take";
+            CP213.description = "A course about SWE";
             CP213.location = "address goes here?";
             CP213.professor = "Albus Dumbledore"
 
@@ -118,7 +118,7 @@ app = {
             AC213.semester = new app.Semester("Fall", "2014");
             AC213.timeslots.push(new app.Timeslot(app.DAYS.Tuesday, '16:00', '17:30'));
             AC213.timeslots.push(new app.Timeslot(app.DAYS.Thursday, '16:00', '17:30'));
-            AC213.description = "A class to take";
+            AC213.description = "An AC course";
             AC213.location = "address goes here?";
             AC213.professor = "Albus Dumbledore";
             app.currentSemester.courses[CP317.getKey()] = CP317;
@@ -233,26 +233,27 @@ app = {
                // console.log(i);
                 var borderClass = '';
                 var timeLabel = '';
-                if (i.getMinutes() == 30) {
-                    borderClass += 'table-border-top-light';
-                    timeLabel = i.getHours() + ":" + i.getMinutes();
-                } else if (i.getMinutes() == 0) {
-                    borderClass += 'table-border-top-dark';
-                    timeLabel = i.getHours() + ":00";
-                } else {
-                    timeLabel = i.getHours() + ":" + i.getMinutes();
-                }
                 table += '<tr class="' + i.getHours() + i.getMinutes() + '">';
-                table += '<td style="min-width: 45px; width: 45px" class="' + borderClass + '">';
-                table += timeLabel;
-                table += '</td>';
+                if (i.getMinutes() % 30 == 0) {
+                    if (i.getMinutes() == 30) {
+                        borderClass += 'table-border-top-light';
+                        timeLabel = i.getHours() + ":" + i.getMinutes();
+                    } else if (i.getMinutes() == 0) {
+                        borderClass += 'table-border-top-dark';
+                        timeLabel = i.getHours() + ":00";
+                    }
+                    table += '<td rowspan="'+ 30 / calendarIncrement +'" style="min-width: 45px; width: 45px" class="' + borderClass + '">';
+                    table += timeLabel;
+                    table += '</td>';
+                }
+
                // add a cell in 10 minute increments
                for (var j = 0; j < (showWeekend ? 7 : 5); ++j) {
                    var borderClassColumn = borderClass;
                    if (j % 2 == 0) {
                      borderClassColumn += ' table-bg';
                    }
-                   table += '<td class="' + borderClassColumn +' day' + j +'">&nbsp</td>';// class="day' + j + '">a</td>';
+                   table += '<td class="' + borderClassColumn +' day' + j +'"></td>';// class="day' + j + '">a</td>';
                 }
                table += "</tr>";
             }
@@ -260,6 +261,7 @@ app = {
             scheduleCalendar.append(table);
 
 
+            // Add current courses to schedule.
             var currentSchedule = app.getScheduleForCurrentSemester();
             for (var i = 0; i < Object.keys(currentSchedule.courses).length; ++i) {
                 var course = app.currentSemester.courses[Object.keys(currentSchedule.courses)[i]];
@@ -268,10 +270,17 @@ app = {
 
                     var timeBlockStart = app.scheduleControl.timeToDateTime(timeslot.startTime);
                     var timeBlockEnd = app.scheduleControl.timeToDateTime(timeslot.endTime);
-                    for ( var a = timeBlockStart; a < timeBlockEnd; a = incrementTime(a, calendarIncrement)) {
-                        var timeSelector = 'tr.' + a.getHours() + a.getMinutes() + ' > td.day' + timeslot.day;
-                        $(timeSelector).css({'background-color': 'pink'});
+                    var rowSpan = 1;
+                    var timeBlock = 'tr.' + timeBlockStart.getHours() + timeBlockStart.getMinutes() + ' > td.day' + timeslot.day;
+                    for (var a = incrementTime(timeBlockStart, calendarIncrement); a < timeBlockEnd; a = incrementTime(a, calendarIncrement)) {
+                        rowSpan += 1;
+                        // for each row spanned, remove the corresponding cell in the calendar.
+                        var mergeBlock = 'tr.' + a.getHours() + a.getMinutes() + ' > td.day' + timeslot.day;
+                        $(mergeBlock).remove();
                     }
+                    $(timeBlock).attr('rowspan', rowSpan);
+                    $(timeBlock).css({'background-color': 'pink'});
+                    $(timeBlock).html(course.description);
                 }
             }
 
