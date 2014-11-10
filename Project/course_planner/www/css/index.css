@@ -40,3 +40,43 @@ tr {
     margin: 0;
     padding: 0;
 }
+
+td {
+    padding: 3px;
+    vertical-align: top;
+}
+
+.course_entry {
+    text-align: center;
+    text-shadow: none;
+    font-size: 10px;
+    position: relative;
+}
+.course_entry h2, h3 {
+  color: white;
+  margin: 0;
+}
+
+.course_entry h2 {
+    font-size: 12px;
+}
+
+.course_entry h3 {
+    font-size: 10px;
+    margin: 0;
+}
+
+.course_entry a.remove {
+    position: absolute;
+    display: block;
+    top: 0;
+    right: 0;
+}
+
+.course_entry a.remove:after {
+    background-color: transparent;
+}
+
+.course_entry .details {
+    padding-top: 7px;
+}

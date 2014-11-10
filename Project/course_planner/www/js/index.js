@@ -170,17 +170,33 @@ app = {
             var schedule = app.getScheduleForCurrentSemester();
 
             courseList.empty();
+            $('.courselist_popup').remove();
+
             for (var i = 0; i < Object.keys(app.currentSemester.courses).length; ++i) {
                 var course = app.currentSemester.courses[Object.keys(app.currentSemester.courses)[i]];
                 if(!schedule.courses[course.getKey()]) { // Skip the courses in the schedule.
-                  $('.course_list').append('<li course_key="'+ course.getKey() + '"class="course_list_item"><a href="#">' + course.courseTitle + '</a></li>');
+                    var menuId = "popup_" + course.getKey();
+                    var listItem = '<li class="course_list_item"><a href="#' + menuId + '" data-rel="popup" data-role="button" data-inline="true" data-transition="slideup" data-icon="gear" data-theme="e">'
+                        + course.courseTitle + '</a></li>';
+                    var coursePopup = '<div class="courselist_popup" data-role="popup" id="' + menuId + '" data-theme="d">';
+                    coursePopup += '<ul data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
+                    coursePopup += '<li><a href="#info">Details</a></li>';
+                    coursePopup += '<li><a course_key="' + course.getKey() + '"';
+                    coursePopup += ' class="add_to_schedule_link" href="#">Add to Schedule</a></li>';
+                    coursePopup += '</ul></div>';
+
+                    $('.course_list').append(listItem);
+                    $('#schedule').append(coursePopup).trigger('pagecreate');
                 }
             }
 
-            $('.course_list_item').click(function(event) {
+            $('.add_to_schedule_link').click(function(event) {
                 var courseKey = event.currentTarget.attributes['course_key'].value;
                 app.scheduleControl.addCourseToSchedule(courseKey);
+
             });
+
+            $('.courselist_popup').popup()
 
         },
         populateSemesterList: function() {
@@ -199,7 +215,19 @@ app = {
                 app.scheduleControl.removeCourseFromSchedule(courseKey);
             });
         },
+        buildCalendarEntry: function(course) {
+
+            var calendarHtml = '<a href="#popup_"' + course.getKey() + '" data-rel="popup" data-role="button" '
+            calendarHtml += 'data-inline="true" data-transition="slideup" data-icon="gear" data-theme="a">';
+            calendarHtml += '<div class="details">';
+            calendarHtml += '<h2>' + course.courseCode + "</h2>";
+            calendarHtml += '<h3>' + course.courseTitle + "</h3>";
+            calendarHtml += '</div></a>';
+
+        },
+
         populateSemesterCalendar: function() {
+            var colorEntries = ['red', 'green', 'blue', 'yellow', 'green', 'orange', 'pink'];
             var calendarIncrement = 10;
             var scheduleCalendar = $('#schedule_calendar');
             scheduleCalendar.empty();
@@ -279,8 +307,8 @@ app = {
                         $(mergeBlock).remove();
                     }
                     $(timeBlock).attr('rowspan', rowSpan);
-                    $(timeBlock).css({'background-color': 'pink'});
-                    $(timeBlock).html(course.description);
+                    $(timeBlock).css({'background-color': colorEntries[i]});
+                    $(timeBlock).html(this.buildCalendarEntry(course));
                 }
             }
 
