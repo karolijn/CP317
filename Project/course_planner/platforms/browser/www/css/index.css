@@ -80,3 +80,12 @@ td {
 .course_entry .details {
     padding-top: 7px;
 }
+
+.courselist_popup {
+    padding: 5px;
+    background-color: white;
+}
+
+.courselist_popup > h2{
+    font-size: 1.2em;
+}

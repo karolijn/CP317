@@ -81,9 +81,6 @@ app = {
     },
 
     selectSemesterControl: {
-        getAvailableSemesters: function() {
-            //TODO: Query LORIS to get a list of available semesters.
-        }
         //Initialize new semester
         setSemester: function() {
             app.currentSemester = new app.Semester(app.TERMS.Fall, "2014");
@@ -179,11 +176,12 @@ app = {
                 var course = app.currentSemester.courses[Object.keys(app.currentSemester.courses)[i]];
                 if(!schedule.courses[course.getKey()]) { // Skip the courses in the schedule.
                     var menuId = "popup_" + course.getKey();
-                    var listItem = '<li class="course_list_item"><a data-position-to="window"
-                    onhref="#' + menuId + '" data-rel="popup" data-role="button" data-inline="true" data-transition="slideup" data-icon="gear" data-theme="e">'
-                        + course.courseTitle + '</a></li>';
-                    var coursePopup = '<div class="courselist_popup" data-role="popup" id="' + menuId + '" data-theme="d">';
-                    coursePopup += '<ul data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
+                    var listItem = '<li class="course_list_item"><a href="#' + menuId + '" data-rel="popup" data-role="button" data-inline="true" data-transition="slideup" data-icon="gear" data-theme="e">'
+                        + course.courseCode + ' ' + course.courseTitle + '</a></li>';
+                    var coursePopup = '<div class="courselist_popup" data-position-to="window" data-role="popup" id="' + menuId + '" data-theme="e" data-overlay-theme="a">';
+                    coursePopup += '<h2>' + course.courseCode + '</h2>';
+                    coursePopup += '<p>' + course.courseTitle + '</p>';
+                    coursePopup += '<ul class="options_list" data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
                     coursePopup += '<li><a href="#info">Details</a></li>';
                     coursePopup += '<li><a course_key="' + course.getKey() + '"';
                     coursePopup += ' class="add_to_schedule_link" href="#">Add to Schedule</a></li>';
@@ -191,6 +189,9 @@ app = {
 
                     $('.course_list').append(listItem);
                     $('#schedule').append(coursePopup).trigger('pagecreate');
+
+                    $('.options_list').listview().listview('refresh');
+                    $('.options_list').listview('refresh')
                 }
             }
 
@@ -227,8 +228,6 @@ app = {
             calendarHtml += '<h2>' + course.courseCode + "</h2>";
             calendarHtml += '<h3>' + course.courseTitle + "</h3>";
             calendarHtml += '</div></a>';
-
-            return calendarHtml;
 
         },
 
