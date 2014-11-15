@@ -29,17 +29,91 @@ app = {
 		FastClick.attach(document.body);
     },
 
+    /**
+     * Class representing a course. A course has a unique
+     * combination of semester, course code and section.
+     */
     Course: function() {
-        this.courseCode;
-        this.courseTitle;
-        this.subject;
-        this.semester;
-        this.timeslots = [];
-        this.description;
-        this.location;
-        this.professor;
+        var courseCode = '';
+        var courseTitle = '';
+        var section = '';
+        var subject = '';
+        var semester = null;
+        var timeslots = [];
+        var description = '';
+        var location = '';
+        var professor = '';
+
+        this.getCourseCode = function() {
+            return courseCode;
+        };
+        this.getCourseTitle = function() {
+            return courseTitle;
+        };
+        this.getSubject = function() {
+            return subject;
+        };
+        this.getSection = function() {
+            return section;
+        };
+        this.getSemester = function() {
+            return semester;
+        };
+        this.getTimeslots = function() {
+            return timeslots;
+        };
+        this.getDescription = function() {
+            return description;
+        };
+        this.getLocation = function() {
+            return location;
+        };
+        this.getProfessor = function() {
+            return professor;
+        };
         this.getKey = function() {
-            return this.semester.getKey() + this.courseCode; };
+            if (semester != null) {
+                return semester.getKey() + courseCode;
+            }
+            return null;
+        };
+
+        this.setCourseCode = function(value) {
+            courseCode = value;
+            return this;
+        };
+        this.setCourseTitle= function(value) {
+            courseTitle = value;
+            return this;
+        };
+        this.setSubject = function(value) {
+            subject = value;
+            return this;
+        };
+        this.setSection = function(value) {
+            section = value;
+            return this;
+        };
+        this.setSemester = function(value) {
+            semester = value;
+            return this;
+        };
+        this.addTimeslot= function(value) {
+            timeslots.push(value);
+            return this;
+        };
+        this.setDescription= function(value) {
+            description = value;
+            return this;
+        };
+        this.setLocation= function(value) {
+            location = value;
+            return this;
+        };
+        this.setProfessor = function(value) {
+            provessor = value;
+            return this;
+        };
     },
 
     Schedule: function Schedule() {
@@ -107,39 +181,43 @@ app = {
         },
         //TODO: replace this with an actual query to loris.
         loadFakeCourses: function() {
-            var CP317 = new app.Course();
-            CP317.courseCode = "CP317";
-            CP317.courseTitle = "Software Engineering";
-            CP317.subject = "CP";
-            CP317.semester = new app.Semester("Fall", "2014");
-            CP317.timeslots.push(new app.Timeslot(app.DAYS.Monday, '11:30', '13:00'));
-            CP317.timeslots.push(new app.Timeslot(app.DAYS.Wednesday, '13:30', '15:00'));
-            CP317.description = "A class to take";
-            CP317.location = "address goes here?";
-            CP317.professor = "Albus Dumbledore"
+            var CP317 = new app.Course()
+                .setCourseCode("CP317")
+                .setCourseTitle("Software Engineering")
+                .setSubject("CP")
+                .setSection("A")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .addTimeslot(new app.Timeslot(app.DAYS.Monday, '11:30', '13:00'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Wednesday, '13:30', '15:00'))
+                .setDescription("A class to take")
+                .setLocation("address goes here?")
+                .setProfessor("Albus Dumbledore");
 
-            var CP213 = new app.Course();
-            CP213.courseCode = "CP213";
-            CP213.courseTitle = "Another SWE Course";
-            CP213.subject = "CP";
-            CP213.semester = new app.Semester("Fall", "2014");
-            CP213.timeslots.push(new app.Timeslot(app.DAYS.Monday, '8:30', '9:30'));
-            CP213.timeslots.push(new app.Timeslot(app.DAYS.Wednesday, '8:30', '9:30'));
-            CP213.timeslots.push(new app.Timeslot(app.DAYS.Friday, '8:30', '9:30'));
-            CP213.description = "A course about SWE";
-            CP213.location = "address goes here?";
-            CP213.professor = "Albus Dumbledore"
+            var CP213 = new app.Course()
+                .setCourseCode("CP213")
+                .setCourseTitle("Another SWE Course")
+                .setSubject("CP")
+                .setSection("A")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .addTimeslot(new app.Timeslot(app.DAYS.Monday, '8:30', '9:30'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Wednesday, '8:30', '9:30'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Friday, '8:30', '9:30'))
+                .setDescription("A course about SWE")
+                .setLocation("address goes here?")
+                .setProfessor("Albus Dumbledore");
 
-            var AC213 = new app.Course();
-            AC213.courseCode = "AC213";
-            AC213.subject = "AC";
-            AC213.courseTitle = "Other Subject"
-            AC213.semester = new app.Semester("Fall", "2014");
-            AC213.timeslots.push(new app.Timeslot(app.DAYS.Tuesday, '16:00', '17:30'));
-            AC213.timeslots.push(new app.Timeslot(app.DAYS.Thursday, '16:00', '17:30'));
-            AC213.description = "An AC course";
-            AC213.location = "address goes here?";
-            AC213.professor = "Albus Dumbledore";
+            var AC213 = new app.Course()
+                .setCourseCode("AC213")
+                .setCourseTitle("Other Subject")
+                .setSubject("AC")
+                .setSection("A")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .addTimeslot(new app.Timeslot(app.DAYS.Tuesday, '16:00', '17:30'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Thursday, '16:00', '17:30'))
+                .setDescription("An AC course")
+                .setLocation("address goes here?")
+                .setProfessor("Albus Dumbledore");
+
             app.currentSemester.courses[CP317.getKey()] = CP317;
             app.currentSemester.courses[CP213.getKey()] = CP213;
             app.currentSemester.courses[AC213.getKey()] = AC213;
@@ -196,12 +274,12 @@ app = {
                 if(!schedule.courses[course.getKey()]) { // Skip the courses in the schedule.
                     var menuId = "popup_" + course.getKey();
                     var listItem = '<li class="course_list_item"><a href="#' + menuId + '" data-rel="popup" data-role="button" data-inline="true" data-transition="slideup" data-icon="gear" data-theme="e">'
-                        + course.courseCode + ' ' + course.courseTitle + '</a></li>';
+                        + course.getCourseCode() + ' ' + course.getCourseTitle() + '</a></li>';
                     var coursePopup = '<div class="courselist_popup" data-position-to="window" data-role="popup" id="' + menuId + '" data-theme="e" data-overlay-theme="a">';
-                    coursePopup += '<h2>' + course.courseCode + '</h2>';
-                    coursePopup += '<p>' + course.courseTitle + '</p>';
-                    for (var j = 0; j < course.timeslots.length; ++j) {
-                        coursePopup += '<p class="timeslot">' + course.timeslots[j].getDayString() + ": " + course.timeslots[j].getStartTime() + '-' + course.timeslots[j].getEndTime() + '</p>';
+                    coursePopup += '<h2>' + course.getCourseCode() + '</h2>';
+                    coursePopup += '<p>' + course.getCourseTitle() + '</p>';
+                    for (var j = 0; j < course.getTimeslots().length; ++j) {
+                        coursePopup += '<p class="timeslot">' + course.getTimeslots()[j].getDayString() + ": " + course.getTimeslots()[j].getStartTime() + '-' + course.getTimeslots()[j].getEndTime() + '</p>';
                     }
                     coursePopup += '<ul class="options_list" data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
                     coursePopup += '<li><a href="#info">Details</a></li>';
@@ -210,10 +288,11 @@ app = {
                     coursePopup += '</ul></div>';
 
                     $('.course_list').append(listItem);
-                    $('#schedule').append(coursePopup).trigger('pagecreate');
+
 
                     $('.options_list').listview().listview('refresh');
                     $('.options_list').listview('refresh')
+                    $('#schedule').append(coursePopup).trigger('pagecreate');
                 }
             }
 
@@ -232,7 +311,7 @@ app = {
             var currentSchedule = app.getScheduleForCurrentSemester();
             for (var i = 0; i < Object.keys(currentSchedule.courses).length; ++i) {
                 var course = app.currentSemester.courses[Object.keys(currentSchedule.courses)[i]];
-                scheduleList.append('<li course_key="'+ course.getKey() + '" class="semester_list_item"><a href="#">' + course.courseTitle + '</a></li>');
+                scheduleList.append('<li course_key="'+ course.getKey() + '" class="semester_list_item"><a href="#">' + course.getCourseTitle() + '</a></li>');
             }
             if (!currentSchedule.courses || currentSchedule.courses.length == 0) {
                 scheduleList.append('<li><a href="#"></a></li>');
@@ -247,8 +326,8 @@ app = {
             var calendarHtml = '<a href="#popup_"' + course.getKey() + '" data-rel="popup" data-role="button" '
             calendarHtml += 'data-inline="true" data-transition="slideup" data-icon="gear" data-theme="a">';
             calendarHtml += '<div class="details">';
-            calendarHtml += '<h2>' + course.courseCode + "</h2>";
-            calendarHtml += '<h3>' + course.courseTitle + "</h3>";
+            calendarHtml += '<h2>' + course.getCourseCode() + "</h2>";
+            calendarHtml += '<h3>' + course.getCourseTitle() + "</h3>";
             calendarHtml += '</div></a>';
 
         },
@@ -320,8 +399,8 @@ app = {
             var currentSchedule = app.getScheduleForCurrentSemester();
             for (var i = 0; i < Object.keys(currentSchedule.courses).length; ++i) {
                 var course = app.currentSemester.courses[Object.keys(currentSchedule.courses)[i]];
-                for (var j = 0; j < course.timeslots.length; ++j) {
-                    var timeslot = course.timeslots[j];
+                for (var j = 0; j < course.getTimeslots().length; ++j) {
+                    var timeslot = course.getTimeslots()[j];
 
                     var timeBlockStart = app.scheduleControl.timeToDateTime(timeslot.getStartTime());
                     var timeBlockEnd = app.scheduleControl.timeToDateTime(timeslot.getEndTime());
