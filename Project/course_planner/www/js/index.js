@@ -29,17 +29,88 @@ app = {
 		FastClick.attach(document.body);
     },
 
+    /**
+     * Class representing a course. A course has a unique
+     * combination of semester, course code and section.
+     */
     Course: function() {
-        this.courseCode;
-        this.courseTitle;
-        this.subject;
-        this.semester;
-        this.timeslots = [];
-        this.description;
-        this.location;
-        this.professor;
+        var courseCode = '';
+        var courseTitle = '';
+        var section = '';
+        var subject = '';
+        var semester;
+        var timeslots = [];
+        var description = '';
+        var location = '';
+        var professor = '';
+
+        this.getCourseCode = function() {
+            return courseCode;
+        };
+        this.getCourseTitle = function() {
+            return courseTitle;
+        };
+        this.getSubject = function() {
+            return subject;
+        };
+        this.getSection = function() {
+            return section;
+        };
+        this.getSemester = function() {
+            return semester;
+        };
+        this.getTimeslots = function() {
+            return timeslots;
+        };
+        this.getDescription = function() {
+            return description;
+        };
+        this.getLocation = function() {
+            return location;
+        };
+        this.getProfessor = function() {
+            return professor;
+        };
         this.getKey = function() {
-            return this.semester.getKey() + this.courseCode; };
+            return this.semester.getKey() + this.courseCode;
+        };
+
+        this.setCourseCode = function(value) {
+            courseCode = value;
+            return this;
+        };
+        this.setCourseTitle= function(value) {
+            courseTitle = value;
+            return this;
+        };
+        this.setSubject = function(value) {
+            subject = value;
+            return this;
+        };
+        this.setSection = function(value) {
+            section = value;
+            return this;
+        };
+        this.setSemester = function(value) {
+            semester = value;
+            return this;
+        };
+        this.addTimeslot= function(value) {
+            timeslots.push(value);
+            return this;
+        };
+        this.setDescription= function(value) {
+            description = value;
+            return this;
+        };
+        this.setLocation= function(value) {
+            location = value;
+            return this;
+        };
+        this.setProfessor = function(value) {
+            provessor = value;
+            return this;
+        };
     },
 
     Schedule: function Schedule() {
@@ -57,10 +128,29 @@ app = {
 
     currentSemester: null,
 
+    /**
+     * Timeslot representing a single classtime.
+     * Courses may have many timeslots for each [day] the course
+     * meets and the [starTime] and [endTime] for those meetings.
+     */
     Timeslot: function (day, startTime, endTime) {
-        this.day = day;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        var day = day;
+        var startTime = startTime;
+        var endTime = endTime;
+        this.getDay = function() {
+            return day;
+        };
+        this.getDayString = function() {
+            return Object.keys(app.DAYS).filter(function(key) {
+                return app.DAYS[key] === day;
+            })[0];
+        }
+        this.getStartTime = function() {
+            return startTime;
+        };
+        this.getEndTime = function() {
+            return endTime;
+        };
     },
 
     DAYS: {
@@ -70,7 +160,7 @@ app = {
         Thursday: 3,
         Friday: 4,
         Saturday: 5,
-        Sunday: 6
+        Sunday: 6,
     },
 
     TERMS: {
@@ -181,6 +271,9 @@ app = {
                     var coursePopup = '<div class="courselist_popup" data-position-to="window" data-role="popup" id="' + menuId + '" data-theme="e" data-overlay-theme="a">';
                     coursePopup += '<h2>' + course.courseCode + '</h2>';
                     coursePopup += '<p>' + course.courseTitle + '</p>';
+                    for (var j = 0; j < course.timeslots.length; ++j) {
+                        coursePopup += '<p class="timeslot">' + course.timeslots[j].getDayString() + ": " + course.timeslots[j].getStartTime() + '-' + course.timeslots[j].getEndTime() + '</p>';
+                    }
                     coursePopup += '<ul class="options_list" data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
                     coursePopup += '<li><a href="#info">Details</a></li>';
                     coursePopup += '<li><a course_key="' + course.getKey() + '"';
@@ -301,8 +394,8 @@ app = {
                 for (var j = 0; j < course.timeslots.length; ++j) {
                     var timeslot = course.timeslots[j];
 
-                    var timeBlockStart = app.scheduleControl.timeToDateTime(timeslot.startTime);
-                    var timeBlockEnd = app.scheduleControl.timeToDateTime(timeslot.endTime);
+                    var timeBlockStart = app.scheduleControl.timeToDateTime(timeslot.getStartTime());
+                    var timeBlockEnd = app.scheduleControl.timeToDateTime(timeslot.getEndTime());
                     var rowSpan = 1;
                     var timeBlock = 'tr.' + timeBlockStart.getHours() + timeBlockStart.getMinutes() + ' > td.day' + timeslot.day;
                     for (var a = incrementTime(timeBlockStart, calendarIncrement); a < timeBlockEnd; a = incrementTime(a, calendarIncrement)) {
@@ -322,7 +415,6 @@ app = {
             timeArray = timeString.split(':');
             return new Date(0, 0, 0, timeArray[0], timeArray[1], 0, 0);
         },
-
         initialize: function() {
             this.populateCourseList();
             this.populateSemesterList();

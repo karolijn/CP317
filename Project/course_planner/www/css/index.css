@@ -89,3 +89,9 @@ td {
 .courselist_popup > h2{
     font-size: 1.2em;
 }
+
+.courselist_popup .timeslot {
+    color: #777777;
+    font-size: 0.8em;
+    line-height: 10px;
+}
