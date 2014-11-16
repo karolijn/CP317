@@ -115,18 +115,73 @@ app = {
             return this;
         };
     },
-
-    Schedule: function Schedule() {
-        this.courses = {};
+    Schedule: function() {
+        var courses = {};
+        this.addCourse = function(course) {
+            courses[course.getKey()] = course;
+            return this;
+        };
+        this.addAllCourses = function(courseList) {
+            courses = courseList;
+            return this;
+        };
+        this.removeCourse = function(courseKey) {
+            if (courses[courseKey]) {
+                delete courses[courseKey];
+            }
+        };
+        this.getCourses = function() {
+            return courses;
+        };
+        this.getCourse = function(courseKey) {
+            return courses[courseKey];
+        };
+        this.getCourseKeys = function() {
+            return Object.keys(courses);
+        };
+        this.clearCourses = function() {
+            courses = {};
+        };
     },
-
-    Semester: function Semester(term, year) {
-        this.term = term;
-        this.year = year;
-        this.courses = {};
+    Semester: function(term, year) {
+        var term = term;
+        var year = year;
+        var courses = {};
+        this.addCourse = function(course) {
+            courses[course.getKey()] = course;
+            return this;
+        };
+        this.addAllCourses = function(courseList) {
+            courses = courseList;
+            return this;
+        };
+        this.getTerm = function() {
+            return term;
+        };
+        this.getYear = function() {
+            return year;
+        };
+        this.getCourses = function() {
+            return courses;
+        };
+        this.toString = function() {
+            return term + " " + year;
+        };
+        this.removeCourse = function(courseKey) {
+            courses[courseKey].delete();
+        };
+        this.getCourse = function(courseKey) {
+            return courses[courseKey];
+        };
+        this.getCourseKeys = function() {
+            return Object.keys(courses);
+        };
+        this.clearCourses = function() {
+            courses = {};
+        };
         this.getKey = function() {
             return 'course_planner_' + term + year;
-        }
+        };
     },
 
     currentSemester: null,
@@ -136,7 +191,7 @@ app = {
      * Courses may have many timeslots for each [day] the course
      * meets and the [starTime] and [endTime] for those meetings.
      */
-    Timeslot: function (day, startTime, endTime) {
+    Timeslot: function(day, startTime, endTime) {
         var day = day;
         var startTime = startTime;
         var endTime = endTime;
@@ -218,28 +273,29 @@ app = {
                 .setLocation("address goes here?")
                 .setProfessor("Albus Dumbledore");
 
-            app.currentSemester.courses[CP317.getKey()] = CP317;
-            app.currentSemester.courses[CP213.getKey()] = CP213;
-            app.currentSemester.courses[AC213.getKey()] = AC213;
+            app.currentSemester
+                .addCourse(CP317)
+                .addCourse(CP213)
+                .addCourse(AC213);
         }
     },
 
     getScheduleForCurrentSemester: function() {
         var semesterKey = app.currentSemester.getKey();
         if (!localStorage.getItem(semesterKey)) {
-            var newSchedule = new app.Schedule();
-            localStorage.setItem(semesterKey, JSON.stringify(newSchedule));
+            localStorage.setItem(semesterKey, JSON.stringify({}));
         }
-        return JSON.parse(localStorage.getItem(semesterKey));
+        var savedCourses = JSON.parse(localStorage.getItem(semesterKey));
+        return new app.Schedule().addAllCourses(savedCourses);
     },
     updateScheduleForCurrentSemester: function(schedule) {
         var semesterKey = app.currentSemester.getKey();
-        localStorage.setItem(semesterKey, JSON.stringify(schedule));
+        localStorage.setItem(semesterKey, JSON.stringify(schedule.getCourses()));
     },
     scheduleControl: {
         addCourseToSchedule: function(courseKey) {
           var schedule = app.getScheduleForCurrentSemester();
-          schedule.courses[courseKey] = app.currentSemester.courses[courseKey];
+          schedule.addCourse(app.currentSemester.getCourse(courseKey));
 
           app.updateScheduleForCurrentSemester(schedule);
           app.scheduleControl.populateCourseList();
@@ -250,7 +306,7 @@ app = {
         },
         removeCourseFromSchedule: function(courseKey) {
           var schedule = app.getScheduleForCurrentSemester();
-          delete schedule.courses[courseKey];
+          schedule.removeCourse(courseKey);
           app.updateScheduleForCurrentSemester(schedule);
           app.scheduleControl.populateCourseList();
           app.scheduleControl.populateSemesterList();
@@ -309,13 +365,14 @@ app = {
             var scheduleList = $('.schedule_list');
             scheduleList.empty();
             var currentSchedule = app.getScheduleForCurrentSemester();
-            for (var i = 0; i < Object.keys(currentSchedule.courses).length; ++i) {
-                var course = app.currentSemester.courses[Object.keys(currentSchedule.courses)[i]];
-                scheduleList.append('<li course_key="'+ course.getKey() + '" class="semester_list_item"><a href="#">' + course.getCourseTitle() + '</a></li>');
+            var courseKeys = currentSchedule.getCourseKeys();
+            for (var i = 0; i < courseKeys.length; ++i) {
+                var course = app.currentSemester.getCourse(courseKeys[i]);
+                scheduleList.append('<li data-icon="false" course_key="'+ course.getKey() + '" class="semester_list_item"><a href="#">' + course.getCourseTitle() + '</a></li>');
             }
-            if (!currentSchedule.courses || currentSchedule.courses.length == 0) {
-                scheduleList.append('<li><a href="#"></a></li>');
-            }
+            //if (!currentSchedule.getCourseKeys().length == 0) {
+            //    scheduleList.append('<li><a href="#"></a></li>');
+           // }
             $('.semester_list_item').click(function(event) {
                 var courseKey = event.currentTarget.attributes['course_key'].value;
                 app.scheduleControl.removeCourseFromSchedule(courseKey);
@@ -353,7 +410,7 @@ app = {
                 tableHeader += '<thead><tr>';
                 tableHeader += '<th style="min-width: 45px;width: 45px;"></th>';
                 tableHeader += '<th>Monday</th>';
-                tableHeader += '<th>Tuseday</th>';
+                tableHeader += '<th>Tuesday</th>';
                 tableHeader += '<th>Wednesday</th>';
                 tableHeader += '<th>Thursday</th>';
                 tableHeader += '<th>Friday</th>';
@@ -397,19 +454,21 @@ app = {
 
             // Add current courses to schedule.
             var currentSchedule = app.getScheduleForCurrentSemester();
-            for (var i = 0; i < Object.keys(currentSchedule.courses).length; ++i) {
-                var course = app.currentSemester.courses[Object.keys(currentSchedule.courses)[i]];
+            var courseKeys = currentSchedule.getCourseKeys();
+            for (var i = 0; i < courseKeys.length; ++i) {
+                var course = app.currentSemester.getCourse(courseKeys[i]);
                 for (var j = 0; j < course.getTimeslots().length; ++j) {
                     var timeslot = course.getTimeslots()[j];
 
                     var timeBlockStart = app.scheduleControl.timeToDateTime(timeslot.getStartTime());
                     var timeBlockEnd = app.scheduleControl.timeToDateTime(timeslot.getEndTime());
                     var rowSpan = 1;
-                    var timeBlock = 'tr.' + timeBlockStart.getHours() + timeBlockStart.getMinutes() + ' > td.day' + timeslot.day;
+                    var timeBlock = 'tr.' + timeBlockStart.getHours() + timeBlockStart.getMinutes() + ' > td.day' + timeslot.getDay();
                     for (var a = incrementTime(timeBlockStart, calendarIncrement); a < timeBlockEnd; a = incrementTime(a, calendarIncrement)) {
                         rowSpan += 1;
                         // for each row spanned, remove the corresponding cell in the calendar.
-                        var mergeBlock = 'tr.' + a.getHours() + a.getMinutes() + ' > td.day' + timeslot.day;
+                        var mergeBlock = 'tr.' + a.getHours() + a.getMinutes() + ' > td.day' + timeslot.getDay()
+                        ;
                         $(mergeBlock).remove();
                     }
                     $(timeBlock).attr('rowspan', rowSpan);
@@ -424,6 +483,7 @@ app = {
             return new Date(0, 0, 0, timeArray[0], timeArray[1], 0, 0);
         },
         initialize: function() {
+            $('h2 .semester_name').text = app.currentSemester.toString();
             this.populateCourseList();
             this.populateSemesterList();
             this.populateSemesterCalendar();
