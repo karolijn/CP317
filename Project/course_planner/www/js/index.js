@@ -325,9 +325,9 @@ app = {
             courseList.empty();
             $('.courselist_popup').remove();
 
-            for (var i = 0; i < Object.keys(app.currentSemester.courses).length; ++i) {
-                var course = app.currentSemester.courses[Object.keys(app.currentSemester.courses)[i]];
-                if(!schedule.courses[course.getKey()]) { // Skip the courses in the schedule.
+            for (var i = 0; i < app.currentSemester.getCourseKeys().length; ++i) {
+                var course = app.currentSemester.getCourse(app.currentSemester.getCourseKeys()[i]);
+                if (!schedule.getCourse(course.getKey())) { // Skip the courses in the schedule.
                     var menuId = "popup_" + course.getKey();
                     var listItem = '<li class="course_list_item"><a href="#' + menuId + '" data-rel="popup" data-role="button" data-inline="true" data-transition="slideup" data-icon="gear" data-theme="e">'
                         + course.getCourseCode() + ' ' + course.getCourseTitle() + '</a></li>';
