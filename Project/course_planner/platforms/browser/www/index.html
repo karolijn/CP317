@@ -57,7 +57,10 @@ https://github.com/app-o-mat/jqm-cordova-template-project/LICENSE.md
         </div>
         <div data-role="collapsible" data-inset="false">
             <h2>Unscheduled Courses</h2>
-            <ul data-role="listview" data-role="collapsible" data-inset="true" data-theme="b" class="course_list">
+            <form class="ui-filterable">
+                 <input id="courseNameFilter" data-type="search" placeholder="search for course">
+            </form>
+            <ul data-role="listview" data-role="collapsible" data-inset="true" data-theme="b" class="course_list" data-filter="true" data-input="#courseNameFilter">
             </ul>
         </div>
 	</div>

@@ -390,7 +390,7 @@ app = {
         },
 
         populateSemesterCalendar: function() {
-            var colorEntries = ['red', 'green', 'blue', 'yellow', 'green', 'orange', 'pink'];
+            var colorEntries = ['#7AB5A8', '#478E7E', '#256E5D', '#0D4D3F', '#002D23'];
             var calendarIncrement = 10;
             var scheduleCalendar = $('#schedule_calendar');
             scheduleCalendar.empty();
@@ -472,7 +472,7 @@ app = {
                         $(mergeBlock).remove();
                     }
                     $(timeBlock).attr('rowspan', rowSpan);
-                    $(timeBlock).css({'background-color': colorEntries[i]});
+                    $(timeBlock).css({'background-color': colorEntries[i % colorEntries.length]});
                     $(timeBlock).html(this.buildCalendarEntry(course));
                 }
             }
