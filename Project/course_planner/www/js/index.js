@@ -293,6 +293,21 @@ app = {
         localStorage.setItem(semesterKey, JSON.stringify(schedule.getCourses()));
     },
     scheduleControl: {
+        initCourseList: function() {
+            $('#schedule').on({
+                pageinit: function(event) {
+                    $('#course_list').listview().filterable('option', 'filterCallback', this.filterCourseList);
+                }
+            });
+        },
+        filterCourseList: function(index, filter) {
+            if (filter.indexOf("subject: ") == 0) {
+                            //search by subject
+            } else {
+                var searchText = $('#course_list').children()[index].textContent;
+                return searchText.toLowerCase().indexOf( filter ) === -1;
+            }
+        },
         addCourseToSchedule: function(courseKey) {
           var schedule = app.getScheduleForCurrentSemester();
           schedule.addCourse(app.currentSemester.getCourse(courseKey));
@@ -483,8 +498,10 @@ app = {
             return new Date(0, 0, 0, timeArray[0], timeArray[1], 0, 0);
         },
         initialize: function() {
-            $('h2 .semester_name').text = app.currentSemester.toString();
+            this.initCourseList();
             this.populateCourseList();
+            //TODO(carolyn): move this somewhere.
+            $('h2 .semester_name').text = app.currentSemester.toString();
             this.populateSemesterList();
             this.populateSemesterCalendar();
         },
