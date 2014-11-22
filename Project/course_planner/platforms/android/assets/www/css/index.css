@@ -30,3 +30,68 @@ body {
 .table-bg {
     background-color: #cfcfcf;
 }
+
+table {
+    border-collapse: collapse;
+}
+
+tr {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+td {
+    padding: 3px;
+    vertical-align: top;
+}
+
+.course_entry {
+    text-align: center;
+    text-shadow: none;
+    font-size: 10px;
+    position: relative;
+}
+.course_entry h2, h3 {
+  color: white;
+  margin: 0;
+}
+
+.course_entry h2 {
+    font-size: 12px;
+}
+
+.course_entry h3 {
+    font-size: 10px;
+    margin: 0;
+}
+
+.course_entry a.remove {
+    position: absolute;
+    display: block;
+    top: 0;
+    right: 0;
+}
+
+.course_entry a.remove:after {
+    background-color: transparent;
+}
+
+.course_entry .details {
+    padding-top: 7px;
+}
+
+.courselist_popup {
+    padding: 5px;
+    background-color: white;
+}
+
+.courselist_popup > h2{
+    font-size: 1.2em;
+}
+
+.courselist_popup .timeslot {
+    color: #777777;
+    font-size: 0.8em;
+    line-height: 10px;
+}

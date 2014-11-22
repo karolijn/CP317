@@ -5,7 +5,7 @@ app = {
         $('#schedule').on('pagebeforecreate', function() {
             app.scheduleControl.initialize();
 
-                        $('#schedule_calendar').css({
+            $('#schedule_calendar').css({
                 height: $(window).height() * 0.5
             });
         });
@@ -28,56 +28,369 @@ app = {
     onDeviceReady: function() {
 		FastClick.attach(document.body);
     },
-
+    timeToDateTime: function(timeString) {
+        timeArray = timeString.split(':');
+        return new Date(0, 0, 0, timeArray[0], timeArray[1], 0, 0);
+    },
+    /**
+     * Class representing a course. A course has a unique
+     * combination of semester, course code and section.
+     */
     Course: function() {
-        this.courseCode;
-        this.courseTitle;
-        this.subject;
-        this.semester;
-        this.timeslots = [];
-        this.description;
-        this.location;
-        this.professor;
+        var courseCode = '';
+        var courseTitle = '';
+        var section = '';
+        var subject = '';
+        var semester = null;
+        var timeslots = [];
+        var description = '';
+        var location = '';
+        var professor = '';
+
+        this.getCourseCode = function() {
+            return courseCode;
+        };
+        this.getCourseTitle = function() {
+            return courseTitle;
+        };
+        this.getSubject = function() {
+            return subject;
+        };
+        this.getSection = function() {
+            return section;
+        };
+        this.getSemester = function() {
+            return semester;
+        };
+        this.getTimeslots = function() {
+            return timeslots;
+        };
+        this.getDescription = function() {
+            return description;
+        };
+        this.getLocation = function() {
+            return location;
+        };
+        this.getProfessor = function() {
+            return professor;
+        };
         this.getKey = function() {
-            return this.semester.getKey() + this.courseCode; };
-    },
+            if (semester != null) {
+                return semester.getKey() + courseCode;
+            }
+            return null;
+        };
 
-    Schedule: function Schedule() {
-        this.courses = {};
+        this.setCourseCode = function(value) {
+            courseCode = value;
+            return this;
+        };
+        this.setCourseTitle= function(value) {
+            courseTitle = value;
+            return this;
+        };
+        this.setSubject = function(value) {
+            subject = value;
+            return this;
+        };
+        this.setSection = function(value) {
+            section = value;
+            return this;
+        };
+        this.setSemester = function(value) {
+            semester = value;
+            return this;
+        };
+        this.addTimeslot= function(value) {
+            timeslots.push(value);
+            return this;
+        };
+        this.setDescription= function(value) {
+            description = value;
+            return this;
+        };
+        this.setLocation= function(value) {
+            location = value;
+            return this;
+        };
+        this.setProfessor = function(value) {
+            provessor = value;
+            return this;
+        };
     },
+    Schedule: function() {
+        var courses = {};
+        // An object containing ordered arrays of time entries for easy lookup/comparison.
+        ScheduleEvent = function(timestamp, courseid, start){
+            var timeStamp = '';
+            var courseId = '';
+            bool isStart = false;
 
-    Semester: function Semester(term, year) {
-        this.term = term;
-        this.year = year;
-        this.courses = {};
+            this.getTimeStamp = function() {
+                return timesStamp;
+            }
+            this.getTimeStampDateTime = function() {
+                app.timeToDateTime(timestamp);
+            }
+
+            this.getCourseId = function() {
+                return courseId;
+            }
+
+            this.isStart = function() {
+                return isStart;
+            }
+
+            this.isEnd = function() {
+                return !isStart;
+            }
+        }
+
+        // A timetable for each day containing ordered arrays of scheduled events.
+        var timetable = {DAYS.Monday = [], DAYS.Tuesday = [], DAYS.Wednesday = [], DAYS.Thursday = [], DAYS.Friday = []};
+        this.addCourse = function(course) {
+            //if (this.getCourseConflicts(course).length > 0) {
+            //    throw "Conflicts with the following courses: " + this.getCourseConflicts(course).join(', ');
+           // }
+            // try to add to timetable
+            try {
+              addCourseToSchedule(course);
+              courses[course.getKey()] = course;
+            } catch(e) {
+              removeCourseFromSchedule(course);
+                alert("CONFLICT!" + e);
+                return this;
+            }
+
+            return this;
+        };
+        var addCourseToSchedule = function(course) {
+            for (var i = 0; i < course.getTimeslots().length < ++i) {
+              var courseTimeslot = course.getTimeslots()[i];
+              var courseDay = courseTimeslot.getDay();
+              var courseStartTime = app.timeToDateTime(courseTimeslot.getStartTime());
+              var courseEndTime = app.timeToDateTime(courseTimeslot.getEndTime());
+              var daySchedule = timetable[courseDay];
+
+              // Find the index of the first schedule event that follows the current
+              // timeslot.
+              var j = 0;
+              while(j < courseDaySchedule.length) {
+                if (courseDaySchedule[j].getTimeStampDateTime() > courseStartTime) {
+                    break;
+                }
+                ++j;
+              }
+
+              // If there is no entry later than the start time,
+              // there is no conflict for this timeslot.
+              if (j == courseDaySchedule.length) {
+                  // Add the course to the schedule at the end.
+                  courseDaySchedule.push(new ScheduleEvent(courseTimeslot.getStartTime(), course.getCourseId(), true));
+                  courseDaySchedule.push(new ScheduleEvent(courseTimeslot.getEndTime(), course.getCourseId(), false));
+              }
+
+              var timestamp = courseDaySchedule[j].getTimeStampDateTime() ;
+              if (timestamp > courseStartTime) {
+                // If the timestamp after the start time falls before the end time,
+                // something happens (start or ends) in the middle of this timeslot.
+                if (timeStamp < courseEndTime) {
+                  throw "Something happens in the middle of the course.";
+                } else if (courseDaySchedule[j].isEnd()) {
+                  // If the first timetable after the course start is also after the end,
+                  // check that something isn't ending that was alreay in progress.
+                  throw "A course was already started before this course began";
+                }
+
+                //If there is no conflict, add the course before the event that follows it.
+                courseDaySchedule.splice(j, 0, new ScheduleEvent(courseTimeslot.getEndTime(), course.getCourseId(), false));
+                courseDaySchedule.splice(j, 0, new ScheduleEvent(courseTimeslot.getEndTime(), course.getCourseId(), true));
+              }
+            }
+        };
+
+        var removeCourseFromSchedule = function(course) {
+            for (var i = 0; i < course.getTimeslots().length; ++i) {
+                // for each timeslot a course has, find it on the schedule and remove it.
+                var currentTimeslot = course.getTimeslots[i];
+                var daySchedule = timetable[currentTimeslot.getDay()];
+                for(var j = 0; j < daySchedule.length; ++j) {
+                    if(daySchedule[j].getCourseId == course.getCourseId()) {
+                        daySchedule.splice(j, 2);
+                        // Break out of hte inner loop. We found the timeslot and can continue
+                        // the outer loop.
+                        break;
+                    }
+                }
+            }
+        }
+     /*   this.getCourseConflicts = function(course) {
+            var conflicts = [];
+            // If the course is already in the list, it can't be added.
+            if (courses[course.getKey()]) {
+                conflicts.push(courses[course.getKey()].getCourseCode());
+                return conflicts;
+            }
+
+            var courseTimetable = {}
+            //Build up an index of the current schedule so it's easy to match against each course.
+            for (var i = 0; i < course.getTimeslots().length; ++i) {
+                // Index by day for easy lookup.
+                if (!courseTimetable[course.getTimeslots()[i].getDay()]) {
+                    courseTimetable[course.getTimeslots()[i].getDay()] = []
+                }
+                courseTimetable[course.getTimeslots()[i].getDay()].push(course.getTimeslots()[i]);
+            }
+
+            // Check each course and make sure that none of the timeslots conflict.
+            for (var i = 0; i < this.getCourseKeys().length; ++i) {
+                var scheduledCourse = app.currentSemester[this.getCourseKeys()[i]];
+                if (typeof scheduledCourse != 'Course') {
+                    continue;
+                }
+
+                // For each timeslot, check to see if it conflicts with the new course.
+                for (var k = 0; k < scheduledCourse.getTimeslots().length; ++k) {
+                    var scheduledTimeslot = scheduledCourse.getTimeslots()[k];
+                    var scheduledTimeslotStart = app.timeToDateTime(scheduledTimeslot.getStartTime());
+                    var scheduledTimeslotEnd = app.timeToDateTime(scheduledTimeslot.getEndTime());
+
+                    // If the new course has class(es) on the same day, check for conflicts.
+                    if (courseTimetable[scheduledTimeslot.getDay()]) {
+                        // Go through each timeslot on the given day and see if it conflicts with the already
+                        // scheduled tiemeslot.
+                        for (var j = 0; j < courseTimetable[scheduledTimeslot.getDay()].length; ++j) {
+                            var timeslot = courseTimetable[scheduledTimeslot.getDay()][j];
+
+                            var timeslotStart = app.timeToDateTime(timeslot.getStartTime());
+                            var timeslotEnd = app.timeToDateTime(timeslot.getEndTime());
+
+                            // If the course starts during another class, it doesn't fit in the schedule.
+                            if(timeslotStart > scheduledTimeslotStart && timeslotStart < scheduledCourseEnd) {
+                                conflicts.push(scheduledCourse.getCourseCode());
+                            }
+                            // if the course ends during another course, it doesn't fit in the schedule.
+                            else if (timeslotEnd > scheduledTimeslotEnd && timeslotEnd < scheduledTimeslotEnd) {
+                                conflicts.push(scheduledCourse.getCourseCode());
+                            }
+                            // if the course starts before and ends after another course, it doesn't fit in the schedule.
+                            else if (timeslotStart < scheudledTimeslotStart && timeslotEnd > scheduledTimeslotEnd) {
+                                conflicts.push(scheduledCourse.getCourseCode());
+                            }
+                        }
+                    }
+                }
+            }
+            return conflicts;
+        }*/
+        this.addAllCourses = function(courseList) {
+            for (var i = 0; i < courseList.length; ++i) {
+                addCourse(courseList[i]);
+            }
+            return this;
+        };
+        this.removeCourse = function(courseKey) {
+            if (courses[courseKey]) {
+                removeCourseFromSchedule(courses[courseKey]
+                delete courses[courseKey];
+            }
+        };
+        this.getCourses = function() {
+            return courses;
+        };
+        this.getCourse = function(courseKey) {
+            return courses[courseKey];
+        };
+        this.getCourseKeys = function() {
+            return Object.keys(courses);
+        };
+        this.clearCourses = function() {
+            courses = {};
+        };
+    },
+    Semester: function(term, year) {
+        var term = term;
+        var year = year;
+        var courses = {};
+        this.addCourse = function(course) {
+            courses[course.getKey()] = course;
+            return this;
+        };
+        this.addAllCourses = function(courseList) {
+            courses = courseList;
+            return this;
+        };
+        this.getTerm = function() {
+            return term;
+        };
+        this.getYear = function() {
+            return year;
+        };
+        this.getCourses = function() {
+            return courses;
+        };
+        this.toString = function() {
+            return term + " " + year;
+        };
+        this.removeCourse = function(courseKey) {
+            courses[courseKey].delete();
+        };
+        this.getCourse = function(courseKey) {
+            return courses[courseKey];
+        };
+        this.getCourseKeys = function() {
+            return Object.keys(courses);
+        };
+        this.clearCourses = function() {
+            courses = {};
+        };
         this.getKey = function() {
             return 'course_planner_' + term + year;
-        }
+        };
     },
 
     currentSemester: null,
 
-    Timeslot: function (day, startTime, endTime) {
-        this.day = day;
-        this.startTime = startTime;
-        this.endTime = endTime;
+    /**
+     * Timeslot representing a single classtime.
+     * Courses may have many timeslots for each [day] the course
+     * meets and the [starTime] and [endTime] for those meetings.
+     */
+    Timeslot: function(day, startTime, endTime) {
+        var day = day;
+        var startTime = startTime;
+        var endTime = endTime;
+        this.getDay = function() {
+            return day;
+        };
+        this.getDayString = function() {
+            return Object.keys(app.DAYS).filter(function(key) {
+                return app.DAYS[key] === day;
+            })[0];
+        }
+        this.getStartTime = function() {
+            return startTime;
+        };
+        this.getEndTime = function() {
+            return endTime;
+        };
     },
 
     DAYS: {
-        Monday: 1,
-        Tuesday: 2,
-        Wednesay: 3,
-        Thursday: 4,
-        Friday: 5,
-        Saturday: 6,
-        Sunday: 7
+        Monday: 0,
+        Tuesday: 1,
+        Wednesday: 2,
+        Thursday: 3,
+        Friday: 4,
+        Saturday: 5,
+        Sunday: 6,
     },
 
     TERMS: {
-        Winter: 1,
-        Fall: 2,
-        Spring: 3,
-        Summer: 4,
+        Winter: 0,
+        Fall: 1,
+        Spring: 2,
+        Summer: 3,
     },
 
     selectSemesterControl: {
@@ -88,81 +401,210 @@ app = {
         },
         //TODO: replace this with an actual query to loris.
         loadFakeCourses: function() {
-            var CP317 = new app.Course();
-            CP317.courseCode = "CP317";
-            CP317.courseTitle = "Software Engineering";
-            CP317.subject = "CP";
-            CP317.semester = new app.Semester("Fall", "2014");
-            CP317.timeslots.push(new app.Timeslot(app.DAYS.Monday, '11:30', '13:00'));
-            CP317.timeslots.push(new app.Timeslot(app.DAYS.Wednesday, '13:30', '15:00'));
-            CP317.description = "A class to take";
-            CP317.location = "address goes here?";
-            CP317.professor = "Albus Dumbledore"
+            var CP317 = new app.Course()
+                .setCourseCode("CP317")
+                .setCourseTitle("Software Engineering")
+                .setSubject("CP")
+                .setSection("A")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .addTimeslot(new app.Timeslot(app.DAYS.Monday, '11:30', '13:00'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Wednesday, '13:30', '15:00'))
+                .setDescription("A class to take")
+                .setLocation("address goes here?")
+                .setProfessor("Albus Dumbledore");
 
-            var CP213 = new app.Course();
-            CP213.courseCode = "CP213";
-            CP213.courseTitle = "Another SWE Course";
-            CP213.subject = "CP";
-            CP213.semester = new app.Semester("Fall", "2014");
-            CP213.timeslots.push(new app.Timeslot(app.DAYS.Monday, '8:30', '9:30'));
-            CP213.timeslots.push(new app.Timeslot(app.DAYS.Wednesday, '8:30', '9:30'));
-            CP213.timeslots.push(new app.Timeslot(app.DAYS.Friday, '8:30', '9:30'));
-            CP213.description = "A class to take";
-            CP213.location = "address goes here?";
-            CP213.professor = "Albus Dumbledore"
+            var CP213 = new app.Course()
+                .setCourseCode("CP213")
+                .setCourseTitle("Another SWE Course")
+                .setSubject("CP")
+                .setSection("A")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .addTimeslot(new app.Timeslot(app.DAYS.Monday, '8:30', '9:30'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Wednesday, '8:30', '9:30'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Friday, '8:30', '9:30'))
+                .setDescription("A course about SWE")
+                .setLocation("address goes here?")
+                .setProfessor("Albus Dumbledore");
 
-            var AC213 = new app.Course();
-            AC213.courseCode = "AC213";
-            AC213.subject = "AC";
-            AC213.courseTitle = "Other Subject"
-            AC213.semester = new app.Semester("Fall", "2014");
-            AC213.timeslots.push(new app.Timeslot(app.DAYS.Tuesday, '16:00', '17:30'));
-            AC213.timeslots.push(new app.Timeslot(app.DAYS.Thursday, '16:00', '17:30'));
-            AC213.description = "A class to take";
-            AC213.location = "address goes here?";
-            AC213.professor = "Albus Dumbledore";
-            app.currentSemester.courses[CP317.getKey()] = CP317;
-            app.currentSemester.courses[CP213.getKey()] = CP213;
-            app.currentSemester.courses[AC213.getKey()] = AC213;
+            var AC213 = new app.Course()
+                .setCourseCode("AC213")
+                .setCourseTitle("Other Subject")
+                .setSubject("AC")
+                .setSection("A")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .addTimeslot(new app.Timeslot(app.DAYS.Tuesday, '16:00', '17:30'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Thursday, '16:00', '17:30'))
+                .setDescription("An AC course")
+                .setLocation("address goes here?")
+                .setProfessor("Albus Dumbledore");
+
+            var CM102 = new app.Course()
+                .setCourseCode("CM401")
+                .setCourseTitle("Interpersonal Communications")
+                .setSubject("CM")
+                .setSection("B")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .addTimeslot(new app.Timeslot(app.DAYS.Tuesday, '16:00', '17:30'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Thursday, '12:00', '13:30'))
+                .setDescription("A course about interpersonal communications for the business context. This course conflicts with AC213 and CM412")
+                .setLocation("address goes here?")
+                .setProfessor("Fred Flintstone");
+
+            var CM412 = new app.Course()
+                .setCourseCode("CM412")
+                .setCourseTitle("Advertising and Culture")
+                .setSubject("CM")
+                .setSection("A")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .addTimeslot(new app.Timeslot(app.DAYS.Tuesday, '16:30', '18:00'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Thursday, '12:00', '17:30'))
+                .setDescription("A course about interpersonal communications for the business context. This course conflicts with AC213 and CM102")
+                .setLocation("address goes here?")
+                .setProfessor("Fred Flintstone");
+
+            app.currentSemester
+                .addCourse(CP317)
+                .addCourse(CP213)
+                .addCourse(AC213)
+                .addCourse(CM102)
+                .addCourse(CM412);
         }
     },
 
     getScheduleForCurrentSemester: function() {
         var semesterKey = app.currentSemester.getKey();
         if (!localStorage.getItem(semesterKey)) {
-            var newSchedule = new app.Schedule();
-            localStorage.setItem(semesterKey, JSON.stringify(newSchedule));
+            localStorage.setItem(semesterKey, JSON.stringify({}));
         }
-        return JSON.parse(localStorage.getItem(semesterKey));
+        var savedCourses = JSON.parse(localStorage.getItem(semesterKey));
+        return new app.Schedule().addAllCourses(savedCourses);
+    },
+    updateScheduleForCurrentSemester: function(schedule) {
+        var semesterKey = app.currentSemester.getKey();
+        localStorage.setItem(semesterKey, JSON.stringify(schedule.getCourses()));
     },
     scheduleControl: {
-        populateCourseList: function() {
+        initCourseList: function() {
+            $('#schedule').on({
+                pageinit: function(event) {
+                    $('#course_list').listview().filterable('option', 'filterCallback', this.filterCourseList);
+                }
+            });
+        },
+        filterCourseList: function(index, filter) {
+            if (filter.indexOf("subject: ") == 0) {
+                            //search by subject
+            } else {
+                var searchText = $('#course_list').children()[index].textContent;
+                return searchText.toLowerCase().indexOf( filter ) === -1;
+            }
+        },
+        addCourseToSchedule: function(courseKey) {
+          var schedule = app.getScheduleForCurrentSemester();
+          try {
+              schedule.addCourse(app.currentSemester.getCourse(courseKey));
 
+
+              app.updateScheduleForCurrentSemester(schedule);
+              app.scheduleControl.populateCourseList();
+              app.scheduleControl.populateSemesterList();
+              app.scheduleControl.populateSemesterCalendar();
+              $('.course_list').listview("refresh");
+              $('.schedule_list').listview("refresh");
+          } catch (e) {
+            alert(e);
+          }
+        },
+        removeCourseFromSchedule: function(courseKey) {
+          var schedule = app.getScheduleForCurrentSemester();
+          schedule.removeCourse(courseKey);
+          app.updateScheduleForCurrentSemester(schedule);
+          app.scheduleControl.populateCourseList();
+          app.scheduleControl.populateSemesterList();
+          app.scheduleControl.populateSemesterCalendar();
+          $('.course_list').listview("refresh");
+          $('.schedule_list').listview("refresh");
+        },
+        populateCourseList: function() {
             var courseList = $('.course_list');
 
             if (app.currentSemester == null) {
                 $.mobile.pageContainer.pagecontainer("change", '#home');
             }
-            for (var i = 0; i < Object.keys(app.currentSemester.courses).length; ++i) {
-                var course = app.currentSemester.courses[Object.keys(app.currentSemester.courses)[i]];
-                $('.course_list').append('<li><a href="#">' + course.courseTitle + '</a></li>');
+            var schedule = app.getScheduleForCurrentSemester();
+
+            courseList.empty();
+            $('.courselist_popup').remove();
+
+            for (var i = 0; i < app.currentSemester.getCourseKeys().length; ++i) {
+                var course = app.currentSemester.getCourse(app.currentSemester.getCourseKeys()[i]);
+                if (!schedule.getCourse(course.getKey())) { // Skip the courses in the schedule.
+                    var menuId = "popup_" + course.getKey();
+                    var listItem = '<li class="course_list_item"><a href="#' + menuId + '" data-rel="popup" data-role="button" data-inline="true" data-transition="slideup" data-icon="gear" data-theme="e">'
+                        + course.getCourseCode() + ' ' + course.getCourseTitle() + '</a></li>';
+                    var coursePopup = '<div class="courselist_popup" data-position-to="window" data-role="popup" id="' + menuId + '" data-theme="e" data-overlay-theme="a">';
+                    coursePopup += '<h2>' + course.getCourseCode() + '</h2>';
+                    coursePopup += '<p>' + course.getCourseTitle() + '</p>';
+                    for (var j = 0; j < course.getTimeslots().length; ++j) {
+                        coursePopup += '<p class="timeslot">' + course.getTimeslots()[j].getDayString() + ": " + course.getTimeslots()[j].getStartTime() + '-' + course.getTimeslots()[j].getEndTime() + '</p>';
+                    }
+                    coursePopup += '<ul class="options_list" data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
+                    coursePopup += '<li><a href="#info">Details</a></li>';
+                    coursePopup += '<li><a course_key="' + course.getKey() + '"';
+                    coursePopup += ' class="add_to_schedule_link" href="#">Add to Schedule</a></li>';
+                    coursePopup += '</ul></div>';
+
+                    $('.course_list').append(listItem);
+
+
+                    $('.options_list').listview().listview('refresh');
+                    $('.options_list').listview('refresh')
+                    $('#schedule').append(coursePopup).trigger('pagecreate');
+                }
             }
+
+            $('.add_to_schedule_link').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.scheduleControl.addCourseToSchedule(courseKey);
+
+            });
+
+            $('.courselist_popup').popup()
+
         },
         populateSemesterList: function() {
             var scheduleList = $('.schedule_list');
+            scheduleList.empty();
             var currentSchedule = app.getScheduleForCurrentSemester();
-            for (var i = 0; i < Object.keys(currentSchedule.courses).length; ++i) {
-                var course = currentSchedule.courses[Object.keys(currentSchedule.courses)[i]];
-                    scheduleList.append('<li><a href="here">' + course.courseTitle + '</a></li>');
+            var courseKeys = currentSchedule.getCourseKeys();
+            for (var i = 0; i < courseKeys.length; ++i) {
+                var course = app.currentSemester.getCourse(courseKeys[i]);
+                scheduleList.append('<li data-icon="false" course_key="'+ course.getKey() + '" class="semester_list_item"><a href="#">' + course.getCourseTitle() + '</a></li>');
             }
-
-            if (!currentSchedule.courses || currentSchedule.courses.length == 0) {
-                scheduleList.append('<li><a href="#"></a></li>');
-            }
+            //if (!currentSchedule.getCourseKeys().length == 0) {
+            //    scheduleList.append('<li><a href="#"></a></li>');
+           // }
+            $('.semester_list_item').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.scheduleControl.removeCourseFromSchedule(courseKey);
+            });
         },
-        populateSemesterCalendar: function() {
-            var scheduleCalendar = $('#schedule_calendar');
+        buildCalendarEntry: function(course) {
 
+            var calendarHtml = '<a href="#popup_"' + course.getKey() + '" data-rel="popup" data-role="button" '
+            calendarHtml += 'data-inline="true" data-transition="slideup" data-icon="gear" data-theme="a">';
+            calendarHtml += '<div class="details">';
+            calendarHtml += '<h2>' + course.getCourseCode() + "</h2>";
+            calendarHtml += '<h3>' + course.getCourseTitle() + "</h3>";
+            calendarHtml += '</div></a>';
+
+        },
+
+        populateSemesterCalendar: function() {
+            var colorEntries = ['#7AB5A8', '#478E7E', '#256E5D', '#0D4D3F', '#002D23'];
+            var calendarIncrement = 10;
+            var scheduleCalendar = $('#schedule_calendar');
+            scheduleCalendar.empty();
             //TODO: get the min and max times
             //TODO: figure out if Sat & Sun need to be displayed
 
@@ -174,48 +616,84 @@ app = {
                 return new Date(time.getTime() + increment_in_minutes * 60000);
             };
 
-            var table = "<table id='calendar-header'>"
-            table += '<thead><tr>';
-            table += '<th></th>';
-            table += '<th>Monday</th>';
-            table += '<th>Tuseday</th>';
-            table += '<th>Wednesday</th>';
-            table += '<th>Thursday</th>';
-            table += '<th>Friday</th>';
-            table += '</tr></thead></table><table id="calendar">';
-            for(var i = minTime; i < maxTime; i = incrementTime(i, 10)) {
+            if ($('#calendar-header').size() == 0) {
+                var tableHeader = "<table style='table-layout: fixed; width: 100%' id='calendar-header'>"
+                tableHeader += '<thead><tr>';
+                tableHeader += '<th style="min-width: 45px;width: 45px;"></th>';
+                tableHeader += '<th>Monday</th>';
+                tableHeader += '<th>Tuesday</th>';
+                tableHeader += '<th>Wednesday</th>';
+                tableHeader += '<th>Thursday</th>';
+                tableHeader += '<th>Friday</th>';
+                tableHeader += '</tr></thead></table>';
+                $(tableHeader).insertBefore(scheduleCalendar);
+            }
+
+            var table = '<table style="table-layout: fixed; width: 100%" id="calendar">';
+
+            for(var i = minTime; i < maxTime; i = incrementTime(i, calendarIncrement)) {
                // console.log(i);
                 var borderClass = '';
                 var timeLabel = '';
-                if (i.getMinutes() == 30) {
-                    borderClass += 'table-border-top-light';
-                    timeLabel = i.getHours() + ":" + i.getMinutes();
-                } else if (i.getMinutes() == 0) {
-                    borderClass += 'table-border-top-dark';
-                    timeLabel = i.getHours() + ":00";
-                } else {
-                    timeLabel = i.getHours() + ":" + i.getMinutes();
+                table += '<tr class="' + i.getHours() + i.getMinutes() + '">';
+                if (i.getMinutes() % 30 == 0) {
+                    if (i.getMinutes() == 30) {
+                        borderClass += 'table-border-top-light';
+                        timeLabel = i.getHours() + ":" + i.getMinutes();
+                    } else if (i.getMinutes() == 0) {
+                        borderClass += 'table-border-top-dark';
+                        timeLabel = i.getHours() + ":00";
+                    }
+                    table += '<td rowspan="'+ 30 / calendarIncrement +'" style="min-width: 45px; width: 45px" class="' + borderClass + '">';
+                    table += timeLabel;
+                    table += '</td>';
                 }
-                table += '<tr>';
-                table += '<td class="' + borderClass + '">';
-                table += timeLabel;
-                table += '</td>';
+
                // add a cell in 10 minute increments
                for (var j = 0; j < (showWeekend ? 7 : 5); ++j) {
                    var borderClassColumn = borderClass;
                    if (j % 2 == 0) {
                      borderClassColumn += ' table-bg';
                    }
-                   table += '<td class="' + borderClassColumn +'">&nbsp</td>'// class="day' + j + '">a</td>';
+                   table += '<td class="' + borderClassColumn +' day' + j +'"></td>';// class="day' + j + '">a</td>';
                 }
                table += "</tr>";
             }
             table += "</table>";
             scheduleCalendar.append(table);
 
+
+            // Add current courses to schedule.
+            var currentSchedule = app.getScheduleForCurrentSemester();
+            var courseKeys = currentSchedule.getCourseKeys();
+            for (var i = 0; i < courseKeys.length; ++i) {
+                var course = app.currentSemester.getCourse(courseKeys[i]);
+                for (var j = 0; j < course.getTimeslots().length; ++j) {
+                    var timeslot = course.getTimeslots()[j];
+
+                    var timeBlockStart = app.timeToDateTime(timeslot.getStartTime());
+                    var timeBlockEnd = app.timeToDateTime(timeslot.getEndTime());
+                    var rowSpan = 1;
+                    var timeBlock = 'tr.' + timeBlockStart.getHours() + timeBlockStart.getMinutes() + ' > td.day' + timeslot.getDay();
+                    for (var a = incrementTime(timeBlockStart, calendarIncrement); a < timeBlockEnd; a = incrementTime(a, calendarIncrement)) {
+                        rowSpan += 1;
+                        // for each row spanned, remove the corresponding cell in the calendar.
+                        var mergeBlock = 'tr.' + a.getHours() + a.getMinutes() + ' > td.day' + timeslot.getDay()
+                        ;
+                        $(mergeBlock).remove();
+                    }
+                    $(timeBlock).attr('rowspan', rowSpan);
+                    $(timeBlock).css({'background-color': colorEntries[i % colorEntries.length]});
+                    $(timeBlock).html(this.buildCalendarEntry(course));
+                }
+            }
+
         },
         initialize: function() {
+            this.initCourseList();
             this.populateCourseList();
+            //TODO(carolyn): move this somewhere.
+            $('h2 .semester_name').text = app.currentSemester.toString();
             this.populateSemesterList();
             this.populateSemesterCalendar();
         },

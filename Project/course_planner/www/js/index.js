@@ -28,7 +28,10 @@ app = {
     onDeviceReady: function() {
 		FastClick.attach(document.body);
     },
-
+    timeToDateTime: function(timeString) {
+        timeArray = timeString.split(':');
+        return new Date(0, 0, 0, timeArray[0], timeArray[1], 0, 0);
+    },
     /**
      * Class representing a course. A course has a unique
      * combination of semester, course code and section.
@@ -117,16 +120,126 @@ app = {
     },
     Schedule: function() {
         var courses = {};
+
+        // A timetable for each day containing ordered arrays of scheduled events.
+        var timetable = [];
+        timetable[app.DAYS.Monday] = [];
+        timetable[app.DAYS.Tuesday] = [];
+        timetable[app.DAYS.Wednesday] = [];
+        timetable[app.DAYS.Thursday] = [];
+        timetable[app.DAYS.Friday] = [];
+
+        // An object containing ordered arrays of time entries for easy lookup/comparison.
+        ScheduleEvent = function(timestamp, courseKey, start){
+            var timeStamp = timestamp;
+            var courseKey = courseKey;
+            var isStart = start;
+
+            this.getTimeStamp = function() {
+                return timeStamp;
+            }
+            this.getTimeStampDateTime = function() {
+                return app.timeToDateTime(timestamp);
+            }
+
+            this.getCourseKey = function() {
+                return courseKey;
+            }
+
+            this.isStart = function() {
+                return isStart;
+            }
+
+            this.isEnd = function() {
+                return !isStart;
+            }
+        }
+
         this.addCourse = function(course) {
-            courses[course.getKey()] = course;
+            try {
+              addCourseToTimetable(course);
+              courses[course.getKey()] = course;
+            } catch(e) {
+              removeCourseFromTimetable(course);
+              throw "Error adding course: " + e;
+            }
             return this;
         };
-        this.addAllCourses = function(courseList) {
-            courses = courseList;
+
+        var addCourseToTimetable = function(course) {
+            for (var i = 0; i < course.getTimeslots().length; ++i) {
+              var courseTimeslot = course.getTimeslots()[i];
+              var courseDay = courseTimeslot.getDay();
+              var courseStartTime = app.timeToDateTime(courseTimeslot.getStartTime());
+              var courseEndTime = app.timeToDateTime(courseTimeslot.getEndTime());
+              var daySchedule = timetable[courseDay];
+
+              // Find the index of the first schedule event that follows the current
+              // timeslot.
+              var j = 0;
+              while(j < daySchedule.length) {
+                if (daySchedule[j].getTimeStampDateTime() > courseStartTime) {
+                    break;
+                }
+                ++j;
+              }
+
+              // If there is no entry later than the start time,
+              // there is no conflict for this timeslot.
+              if (j == daySchedule.length) {
+                  // Add the course to the schedule at the end.
+                  daySchedule.push(new ScheduleEvent(courseTimeslot.getStartTime(), course.getKey(), true));
+                  daySchedule.push(new ScheduleEvent(courseTimeslot.getEndTime(), course.getKey(), false));
+                  continue;
+              }
+
+              var timestamp = daySchedule[j].getTimeStampDateTime();
+              if (timestamp > courseStartTime) {
+                // If the timestamp after the start time falls before the end time,
+                // something happens (start or ends) in the middle of this timeslot.
+                // or
+                // If the first timetable after the course start is also after the end,
+                // check that something isn't ending that was alreay in progress.
+                if (timestamp < courseEndTime || daySchedule[j].isEnd()) {
+                  throw course.getCourseCode() + " conflicts with "
+                    + app.currentSemester.getCourse((daySchedule[j].getCourseKey())).getCourseCode()
+                    + ". You can only schedule one of these courses."
+                }
+
+                //If there is no conflict, add the course before the event that follows it.
+                daySchedule.splice(j, 0, new ScheduleEvent(courseTimeslot.getEndTime(), course.getKey(), false));
+                daySchedule.splice(j, 0, new ScheduleEvent(courseTimeslot.getEndTime(), course.getKey(), true));
+              }
+            }
+        };
+        var removeCourseFromTimetable = function(course) {
+            for (var i = 0; i < course.getTimeslots().length; ++i) {
+                // for each timeslot a course has, find it on the schedule and remove it.
+                var currentTimeslot = course.getTimeslots()[i];
+                var daySchedule = timetable[currentTimeslot.getDay()];
+                for(var j = 0; j < daySchedule.length; ++j) {
+                    if(daySchedule[j].getCourseKey() == course.getKey()) {
+                        daySchedule.splice(j, 2);
+                        // Break out of hte inner loop. We found the timeslot and can continue
+                        // the outer loop.
+                        break;
+                    }
+                }
+            }
+        }
+        this.fromStorage = function(courseList) {
+            for (var i = 0; i < courseList.length; ++i) {
+                course = app.currentSemester.getCourse(courseList[i]);
+                this.addCourse(course);
+            }
             return this;
         };
+        this.toStorage = function() {
+            return Object.keys(courses);
+        }
         this.removeCourse = function(courseKey) {
             if (courses[courseKey]) {
+                removeCourseFromTimetable(courses[courseKey]);
                 delete courses[courseKey];
             }
         };
@@ -273,24 +386,51 @@ app = {
                 .setLocation("address goes here?")
                 .setProfessor("Albus Dumbledore");
 
+            var CM102 = new app.Course()
+                .setCourseCode("CM401")
+                .setCourseTitle("Interpersonal Communications")
+                .setSubject("CM")
+                .setSection("B")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .addTimeslot(new app.Timeslot(app.DAYS.Tuesday, '16:00', '17:30'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Thursday, '12:00', '13:30'))
+                .setDescription("A course about interpersonal communications for the business context. This course conflicts with AC213 and CM412")
+                .setLocation("address goes here?")
+                .setProfessor("Fred Flintstone");
+
+            var CM412 = new app.Course()
+                .setCourseCode("CM412")
+                .setCourseTitle("Advertising and Culture")
+                .setSubject("CM")
+                .setSection("A")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .addTimeslot(new app.Timeslot(app.DAYS.Tuesday, '16:30', '18:00'))
+                .addTimeslot(new app.Timeslot(app.DAYS.Thursday, '12:00', '17:30'))
+                .setDescription("A course about interpersonal communications for the business context. This course conflicts with AC213 and CM102")
+                .setLocation("address goes here?")
+                .setProfessor("Fred Flintstone");
+
             app.currentSemester
                 .addCourse(CP317)
                 .addCourse(CP213)
-                .addCourse(AC213);
+                .addCourse(AC213)
+                .addCourse(CM102)
+                .addCourse(CM412);
         }
     },
 
     getScheduleForCurrentSemester: function() {
         var semesterKey = app.currentSemester.getKey();
         if (!localStorage.getItem(semesterKey)) {
-            localStorage.setItem(semesterKey, JSON.stringify({}));
+            var scheduleStorage = new app.Schedule().toStorage();
+            localStorage.setItem(semesterKey, JSON.stringify(scheduleStorage));
         }
-        var savedCourses = JSON.parse(localStorage.getItem(semesterKey));
-        return new app.Schedule().addAllCourses(savedCourses);
+        var savedSchedule = JSON.parse(localStorage.getItem(semesterKey));
+        return new app.Schedule().fromStorage(savedSchedule);
     },
     updateScheduleForCurrentSemester: function(schedule) {
         var semesterKey = app.currentSemester.getKey();
-        localStorage.setItem(semesterKey, JSON.stringify(schedule.getCourses()));
+        localStorage.setItem(semesterKey, JSON.stringify(schedule.toStorage()));
     },
     scheduleControl: {
         initCourseList: function() {
@@ -310,14 +450,19 @@ app = {
         },
         addCourseToSchedule: function(courseKey) {
           var schedule = app.getScheduleForCurrentSemester();
-          schedule.addCourse(app.currentSemester.getCourse(courseKey));
+          try {
+              schedule.addCourse(app.currentSemester.getCourse(courseKey));
 
-          app.updateScheduleForCurrentSemester(schedule);
-          app.scheduleControl.populateCourseList();
-          app.scheduleControl.populateSemesterList();
-          app.scheduleControl.populateSemesterCalendar();
-          $('.course_list').listview("refresh");
-          $('.schedule_list').listview("refresh");
+
+              app.updateScheduleForCurrentSemester(schedule);
+              app.scheduleControl.populateCourseList();
+              app.scheduleControl.populateSemesterList();
+              app.scheduleControl.populateSemesterCalendar();
+              $('.course_list').listview("refresh");
+              $('.schedule_list').listview("refresh");
+          } catch (e) {
+            alert(e);
+          }
         },
         removeCourseFromSchedule: function(courseKey) {
           var schedule = app.getScheduleForCurrentSemester();
@@ -475,8 +620,8 @@ app = {
                 for (var j = 0; j < course.getTimeslots().length; ++j) {
                     var timeslot = course.getTimeslots()[j];
 
-                    var timeBlockStart = app.scheduleControl.timeToDateTime(timeslot.getStartTime());
-                    var timeBlockEnd = app.scheduleControl.timeToDateTime(timeslot.getEndTime());
+                    var timeBlockStart = app.timeToDateTime(timeslot.getStartTime());
+                    var timeBlockEnd = app.timeToDateTime(timeslot.getEndTime());
                     var rowSpan = 1;
                     var timeBlock = 'tr.' + timeBlockStart.getHours() + timeBlockStart.getMinutes() + ' > td.day' + timeslot.getDay();
                     for (var a = incrementTime(timeBlockStart, calendarIncrement); a < timeBlockEnd; a = incrementTime(a, calendarIncrement)) {
@@ -492,10 +637,6 @@ app = {
                 }
             }
 
-        },
-        timeToDateTime: function(timeString) {
-            timeArray = timeString.split(':');
-            return new Date(0, 0, 0, timeArray[0], timeArray[1], 0, 0);
         },
         initialize: function() {
             this.initCourseList();
