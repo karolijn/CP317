@@ -521,17 +521,18 @@ app = {
             var courseKeys = currentSchedule.getCourseKeys();
             for (var i = 0; i < courseKeys.length; ++i) {
                 var course = app.currentSemester.getCourse(courseKeys[i]);
-
-                var popup = this.buildScheduledPopupForCourse(course);
-                var popup_id = '#' + $(popup)[0].getAttribute('id');
-
+                var linkId = "schedule_list_link_" + course.getKey();
                 scheduleList.append('<li data-icon="false" course_key="'+ course.getKey() + '" class="semester_list_item">'
-                    + '<a data-rel="popup" href="' + popup_id + '">' + course.getCourseTitle() + '</a></li>');
+                    + '<a id="' + linkId + '" onclick="this.updatePopup" data-rel="popup" href="#course_popup">' + course.getCourseTitle() + '</a></li>');
 
-                $(popup_id).remove(); // remove the popup if it already exists.
-                $('#schedule').append(popup).trigger('pagecreate');
-                var popup_id = '#' + $(popup)[0].getAttribute('id');
-                $(popup_id).popup();
+                var control = this;
+                var updatePopup = function(course) {
+                    return function() {
+                        control.updatePopup(course);
+                    }
+                }
+
+                $('#' + linkId).click(updatePopup(course));
             }
         },
         buildCalendarEntry: function(course) {
@@ -545,6 +546,49 @@ app = {
             calendarHtml += this.buildCalendarPopupForCourse(course);
             return calendarHtml;
 
+        },
+        updatePopup: function (course, add_to_schedule) {
+            var popupContent = '<p>' + course.getCourseTitle() + '</p>';
+            for (var j = 0; j < course.getTimeslots().length; ++j) {
+                popupContent += '<p class="timeslot">'
+                    + course.getTimeslots()[j].getDayString() + ": "
+                    + course.getTimeslots()[j].getStartTime() + '-'
+                    + course.getTimeslots()[j].getEndTime() + '</p>';
+            }
+
+            var detailsLink = '<li><a href="#info">Details</a></li>';
+            var removeCourseLink = '<li><a course_key="' + course.getKey() + '"'
+                    + ' class="remove_from_schedule_link" href="#">'
+                    + 'Remove from Schedule</a></li>';
+            var addCourseLink = '<li><a course_key="' + course.getKey() + '"'
+                    + ' class="add_to_schedule_link" href="#">'
+                    + 'Add to Schedule</a></li>';
+
+            var popup = $('#course_popup');
+            popup.find('h2').html(course.getCourseCode());
+            popup.find('.popup_content').html(popupContent);
+            popup.find('.options_list').empty();
+            popup.find('.options_list').append(detailsLink);
+            if (!add_to_schedule) {
+                popup.find('.options_list').append(removeCourseLink);
+            } else {
+                popup.find('.options_list').append(addCourseLink);
+            }
+
+            $('.remove_from_schedule_link').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.scheduleControl.removeCourseFromSchedule(courseKey);
+                popup.popup('close');
+            });
+
+            $('.add_to_schedule_link').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.scheduleControl.addCourseToSchedule(courseKey);
+                popup.popup('close');
+            });
+
+            popup.popup();
+            popup.find('.options_list').listview().listview('refresh');
         },
         buildCalendarPopupForCourse: function(course) {
             var popup_id = 'popup_calendar' + course.getKey();
