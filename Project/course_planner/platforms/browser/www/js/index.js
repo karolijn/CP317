@@ -10,14 +10,6 @@ app = {
             });
         });
 
-      /*  $('#schedule').on('pageinit', function() {
-            $("#calendar").floatThead({
-                scrollContainer: function ($table) {
-                    return $table.closest('#schedule_calendar');
-                }
-            });
-        });*/
-
         $(window).on('resize', function() {
             $('#schedule_calendar').css({
                 height: $(window).height() * 0.5
@@ -515,10 +507,11 @@ app = {
             $('.add_to_schedule_link').click(function(event) {
                 var courseKey = event.currentTarget.attributes['course_key'].value;
                 app.scheduleControl.addCourseToSchedule(courseKey);
+               // $('#' + menuId).popup('close');
 
             });
 
-            $('.courselist_popup').popup()
+            $('.courselist_popup').popup();
 
         },
         populateSemesterList: function() {
@@ -528,27 +521,81 @@ app = {
             var courseKeys = currentSchedule.getCourseKeys();
             for (var i = 0; i < courseKeys.length; ++i) {
                 var course = app.currentSemester.getCourse(courseKeys[i]);
-                scheduleList.append('<li data-icon="false" course_key="'+ course.getKey() + '" class="semester_list_item"><a href="#">' + course.getCourseTitle() + '</a></li>');
+
+                var popup = this.buildScheduledPopupForCourse(course);
+                var popup_id = '#' + $(popup)[0].getAttribute('id');
+
+                scheduleList.append('<li data-icon="false" course_key="'+ course.getKey() + '" class="semester_list_item">'
+                    + '<a data-rel="popup" href="' + popup_id + '">' + course.getCourseTitle() + '</a></li>');
+
+                $(popup_id).remove(); // remove the popup if it already exists.
+                $('#schedule').append(popup).trigger('pagecreate');
+                var popup_id = '#' + $(popup)[0].getAttribute('id');
+                $(popup_id).popup();
             }
-            //if (!currentSchedule.getCourseKeys().length == 0) {
-            //    scheduleList.append('<li><a href="#"></a></li>');
-           // }
-            $('.semester_list_item').click(function(event) {
-                var courseKey = event.currentTarget.attributes['course_key'].value;
-                app.scheduleControl.removeCourseFromSchedule(courseKey);
-            });
         },
         buildCalendarEntry: function(course) {
 
-            var calendarHtml = '<a href="#popup_"' + course.getKey() + '" data-rel="popup" data-role="button" '
-            calendarHtml += 'data-inline="true" data-transition="slideup" data-icon="gear" data-theme="a">';
+            var calendarHtml = '<a href="#popup_calendar' + course.getKey() + '" data-rel="popup">';
             calendarHtml += '<div class="details">';
             calendarHtml += '<h2>' + course.getCourseCode() + "</h2>";
             calendarHtml += '<h3>' + course.getCourseTitle() + "</h3>";
             calendarHtml += '</div></a>';
 
-        },
+            calendarHtml += this.buildCalendarPopupForCourse(course);
+            return calendarHtml;
 
+        },
+        buildCalendarPopupForCourse: function(course) {
+            var popup_id = 'popup_calendar' + course.getKey();
+            var popup = '<div class="calendar_popup" data-position-to="window" data-role="popup" id="' + popup_id + '" data-theme="e" data-overlay-theme="a">';
+                    popup += '<h2>' + course.getCourseCode() + '</h2>';
+                    popup += '<p>' + course.getCourseTitle() + '</p>';
+                    for (var j = 0; j < course.getTimeslots().length; ++j) {
+                        popup += '<p class="timeslot">' + course.getTimeslots()[j].getDayString() + ": " + course.getTimeslots()[j].getStartTime() + '-' + course.getTimeslots()[j].getEndTime() + '</p>';
+                    }
+                    popup += '<ul class="options_list" data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
+                    popup += '<li><a href="#info">Details</a></li>';
+                    popup += '<li><a course_key="' + course.getKey() + '"';
+                    popup += ' class="remove_from_calendar_link" href="#">Remove from Schedule</a></li>';
+                    popup += '</ul></div>';
+
+            $('.remove_from_calendar_link').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.scheduleControl.removeCourseFromSchedule(courseKey);
+                $('#' + popup_id).popup();
+                $('#' + popup_id).popup('close');
+                $('#' + popup_id).popup();
+            });
+            return popup;
+
+        },
+        buildScheduledPopupForCourse: function(course) {
+            var popup_id = 'popup_course_schedule' + course.getKey();
+            var popup = '<div class="calendar_course_schedule" data-position-to="window" data-role="popup" id="' + popup_id + '" data-theme="e" data-overlay-theme="a">';
+                    popup += '<h2>' + course.getCourseCode() + '</h2>';
+                    popup += '<p>' + course.getCourseTitle() + '</p>';
+                    for (var j = 0; j < course.getTimeslots().length; ++j) {
+                        popup += '<p class="timeslot">' + course.getTimeslots()[j].getDayString() + ": " + course.getTimeslots()[j].getStartTime() + '-' + course.getTimeslots()[j].getEndTime() + '</p>';
+                    }
+                    popup += '<ul class="options_list" data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
+                    popup += '<li><a href="#info">Details</a></li>';
+                    popup += '<li><a course_key="' + course.getKey() + '"';
+                    popup += ' class="remove_from_schedule_link" href="#">Remove from Schedule</a></li>';
+                    popup += '</ul></div>';
+
+            $('.remove_from_schedule_link').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.scheduleControl.removeCourseFromSchedule(courseKey);
+                $('#' + popup_id).popup();
+                $('#' + popup_id).popup('close');
+                $('#' + popup_id).popup();
+
+            });
+
+            return popup;
+
+        },
         populateSemesterCalendar: function() {
             var colorEntries = ['#7AB5A8', '#478E7E', '#256E5D', '#0D4D3F', '#002D23'];
             var calendarIncrement = 10;
@@ -634,6 +681,9 @@ app = {
                     $(timeBlock).attr('rowspan', rowSpan);
                     $(timeBlock).css({'background-color': colorEntries[i % colorEntries.length]});
                     $(timeBlock).html(this.buildCalendarEntry(course));
+
+                    $('.calendar_popup').popup();
+                    $('.options_list').listview().listview('refresh');
                 }
             }
 
