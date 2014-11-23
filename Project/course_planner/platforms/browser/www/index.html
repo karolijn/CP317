@@ -49,7 +49,7 @@ https://github.com/app-o-mat/jqm-cordova-template-project/LICENSE.md
         </div>
         <div data-role="collapsible" data-inset="false">
             <h2>Scheduled Courses</h2>
-            <ul data-role="listview" data-inset="true" data-theme="b" class="schedule_list">
+            <ul id="schedule_list" data-role="listview" data-inset="true" data-theme="b" class="schedule_list">
             </ul>
         </div>
         <div data-role="collapsible" data-inset="false">
@@ -57,7 +57,7 @@ https://github.com/app-o-mat/jqm-cordova-template-project/LICENSE.md
             <form class="ui-filterable">
                  <input id="course_name_filter" data-type="search" placeholder="search for course">
             </form>
-            <ul data-role="listview" data-role="collapsible" data-inset="true" data-theme="b" id="course_list" class="course_list" data-filter="true"
+            <ul id="course_list" data-role="listview" data-role="collapsible" data-inset="true" data-theme="b" class="course_list" data-filter="true"
             data-input="#course_name_filter">
             </ul>
         </div>
