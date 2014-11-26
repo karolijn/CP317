@@ -1,7 +1,5 @@
 app = {
     initialize: function() {
-		document.addEventListener('deviceready', this.onDeviceReady, false);
-
         $('#schedule').on('pagebeforecreate', function() {
             app.scheduleControl.initialize();
 
@@ -15,10 +13,6 @@ app = {
                 height: $(window).height() * 0.5
             });
         });
-    },
-
-    onDeviceReady: function() {
-		FastClick.attach(document.body);
     },
     timeToDateTime: function(timeString) {
         timeArray = timeString.split(':');
@@ -555,12 +549,6 @@ app = {
                 var course_entry = $(this).attr('calendar_entry');
                 $("[calendar_entry='" + course_entry + "']" ).removeClass("selected");
             });
-
-           // $(calendarHtml).css({'background-color': colorEntries[i % colorEntries.length]});
-
-          //  $('.options_list').listview().listview('refresh');
-          //  $('.options_list').listview('refresh')
-          //  this.refreshPopup();
         },
         refreshPopup: function() {
             var popup = $('#course_popup');

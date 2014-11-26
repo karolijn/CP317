@@ -1,7 +1,5 @@
 app = {
     initialize: function() {
-		document.addEventListener('deviceready', this.onDeviceReady, false);
-
         $('#schedule').on('pagebeforecreate', function() {
             app.scheduleControl.initialize();
 
@@ -15,10 +13,6 @@ app = {
                 height: $(window).height() * 0.5
             });
         });
-    },
-
-    onDeviceReady: function() {
-		FastClick.attach(document.body);
     },
     timeToDateTime: function(timeString) {
         timeArray = timeString.split(':');
@@ -263,6 +257,11 @@ app = {
         this.getTerm = function() {
             return term;
         };
+        this.getTermString = function() {
+            return Object.keys(app.TERMS).filter(function(key) {
+                return app.TERMS[key] === term;
+            })[0];
+        }
         this.getYear = function() {
             return year;
         };
@@ -270,7 +269,7 @@ app = {
             return courses;
         };
         this.toString = function() {
-            return term + " " + year;
+            return this.getTermString() + " " + year;
         };
         this.removeCourse = function(courseKey) {
             courses[courseKey].delete();
@@ -410,7 +409,6 @@ app = {
                 .addCourse(CM412);
         }
     },
-
     getScheduleForCurrentSemester: function() {
         var semesterKey = app.currentSemester.getKey();
         if (!localStorage.getItem(semesterKey)) {
@@ -445,7 +443,6 @@ app = {
           try {
               schedule.addCourse(app.currentSemester.getCourse(courseKey));
 
-
               app.updateScheduleForCurrentSemester(schedule);
               app.scheduleControl.populateCourseList();
               app.scheduleControl.populateSemesterList();
@@ -467,169 +464,150 @@ app = {
           $('.schedule_list').listview("refresh");
         },
         populateCourseList: function() {
-            var courseList = $('.course_list');
-
             if (app.currentSemester == null) {
                 $.mobile.pageContainer.pagecontainer("change", '#home');
             }
+
             var schedule = app.getScheduleForCurrentSemester();
-
+            var listId = 'course_list';
+            var courseList = $('#' + listId);
             courseList.empty();
-            $('.courselist_popup').remove();
-
-            for (var i = 0; i < app.currentSemester.getCourseKeys().length; ++i) {
-                var course = app.currentSemester.getCourse(app.currentSemester.getCourseKeys()[i]);
+            var courseKeys = app.currentSemester.getCourseKeys();
+            for (var i = 0; i < courseKeys.length; ++i) {
+                var course = app.currentSemester.getCourse(courseKeys[i]);
                 if (!schedule.getCourse(course.getKey())) { // Skip the courses in the schedule.
-                    var menuId = "popup_" + course.getKey();
-                    var listItem = '<li class="course_list_item"><a href="#' + menuId + '" data-rel="popup" data-role="button" data-inline="true" data-transition="slideup" data-icon="gear" data-theme="e">'
-                        + course.getCourseCode() + ' ' + course.getCourseTitle() + '</a></li>';
-                    var coursePopup = '<div class="courselist_popup" data-position-to="window" data-role="popup" id="' + menuId + '" data-theme="e" data-overlay-theme="a">';
-                    coursePopup += '<h2>' + course.getCourseCode() + '</h2>';
-                    coursePopup += '<p>' + course.getCourseTitle() + '</p>';
-                    for (var j = 0; j < course.getTimeslots().length; ++j) {
-                        coursePopup += '<p class="timeslot">' + course.getTimeslots()[j].getDayString() + ": " + course.getTimeslots()[j].getStartTime() + '-' + course.getTimeslots()[j].getEndTime() + '</p>';
+                    var control = this;
+                    var updatePopup = function(course) {
+                        return function() {
+                            control.updatePopup(course, true /* add to schedule */);
+                        }
                     }
-                    coursePopup += '<ul class="options_list" data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
-                    coursePopup += '<li><a href="#info">Details</a></li>';
-                    coursePopup += '<li><a course_key="' + course.getKey() + '"';
-                    coursePopup += ' class="add_to_schedule_link" href="#">Add to Schedule</a></li>';
-                    coursePopup += '</ul></div>';
 
-                    $('.course_list').append(listItem);
-
-
-                    $('.options_list').listview().listview('refresh');
-                    $('.options_list').listview('refresh')
-                    $('#schedule').append(coursePopup).trigger('pagecreate');
+                    this.addCourseListItem(course, listId, updatePopup(course));
                 }
             }
+        },
+        addCourseListItem: function(course, listId, action) {
+            var linkId = listId + course.getKey();
+            var link = '<a id="' + linkId +'" href="#course_popup" data-rel="popup">'
+                + course.getCourseCode() + ' ' + course.getCourseTitle() + '</a>';
+            var listItem = '<li data-icon="false" course_key="' + course.getKey() + '"'
+               + ' class="course_list_item">' + link + '</li>';
 
-            $('.add_to_schedule_link').click(function(event) {
-                var courseKey = event.currentTarget.attributes['course_key'].value;
-                app.scheduleControl.addCourseToSchedule(courseKey);
-               // $('#' + menuId).popup('close');
-
+            $('#' + listId).append(listItem);
+            $('#' + linkId).click(function() {
+                action();
             });
-
-            $('.courselist_popup').popup();
-
         },
         populateSemesterList: function() {
-            var scheduleList = $('.schedule_list');
+            var listId = 'schedule_list';
+            var scheduleList = $('#' + listId);
             scheduleList.empty();
             var currentSchedule = app.getScheduleForCurrentSemester();
             var courseKeys = currentSchedule.getCourseKeys();
             for (var i = 0; i < courseKeys.length; ++i) {
                 var course = app.currentSemester.getCourse(courseKeys[i]);
+                var control = this;
+                var updatePopup = function(course) {
+                    return function() {
+                        control.updatePopup(course, false /* add to schedule */);
+                    }
+                }
 
-                var popup = this.buildRemovePopup(course);
-                var popup_id = '#' + $(popup)[0].getAttribute('id');
-
-                scheduleList.append('<li data-icon="false" course_key="'+ course.getKey() + '" class="semester_list_item">'
-                    + '<a data-rel="popup" href="' + popup_id + '">' + course.getCourseTitle() + '</a></li>');
-
-                $(popup_id).remove(); // remove the popup if it already exists.
-                $('#schedule').append(popup).trigger('pagecreate');
-                var popup_id = '#' + $(popup)[0].getAttribute('id');
-                $(popup_id).popup();
+                this.addCourseListItem(course, listId, updatePopup(course));
             }
         },
-        buildCalendarEntry: function(course) {
-
-            var calendarHtml = '<a href="#popup_calendar' + course.getKey() + '" data-rel="popup">';
+        populateCalendarEntry: function(course, timeslotCell, timeslotId) {
+            var colorEntries = ['#7AB5A8', '#478E7E', '#256E5D', '#0D4D3F', '#002D23'];
+            var control = this;
+            var updatePopup = function(course) {
+                return function() {
+                    control.updatePopup(course, false /* add to schedule */);
+                }();
+            }
+            var entryId = "calendar_entry_" + course.getKey() + timeslotId;
+            var calendarHtml = '<a class="calendar_entry" calendar_entry="' + course.getKey()
+                +'" id="' + entryId + '" href="#course_popup" data-rel="popup">';
             calendarHtml += '<div class="details">';
             calendarHtml += '<h2>' + course.getCourseCode() + "</h2>";
             calendarHtml += '<h3>' + course.getCourseTitle() + "</h3>";
             calendarHtml += '</div></a>';
 
-            calendarHtml += this.buildCalendarPopupForCourse(course);
-            return calendarHtml;
+            $(timeslotCell).html(calendarHtml);
 
-        },
-        buildRemovePopup: function (course, menu_id) {
-            var popup_id = menu_id + '_' + course.getKey();
-            var popup = '<div class="popup_'+ menu_id +'"'
-                        + 'id="' + popup_id + '"'
-                        + ' data-position-to="window" data-role="popup" '
-                        + ' data-theme="e" data-overlay-theme="a">';
-                    popup += '<h2>' + course.getCourseCode() + '</h2>';
-                    popup += '<p>' + course.getCourseTitle() + '</p>';
-                    for (var j = 0; j < course.getTimeslots().length; ++j) {
-                        popup += '<p class="timeslot">' + course.getTimeslots()[j].getDayString()
-                            + ": " + course.getTimeslots()[j].getStartTime()
-                            + '-' + course.getTimeslots()[j].getEndTime() + '</p>';
-                    }
-                    popup += '<ul class="options_list" data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
-                    popup += '<li><a href="#info">Details</a></li>';
-                    popup += '<li><a course_key="' + course.getKey() + '"';
-                    popup += ' id="remove_' + popup_id + '"
-                        class="remove_from_calendar_link" href="#">Remove from Schedule</a></li>';
-                    popup += '</ul></div>';
+            // adjust entry height to fill table cell.
+            $('#' + entryId).height($(timeslotCell).height());
 
-            $('#remove_' + popup_id).click(function(event) {
-                var courseKey = event.currentTarget.attributes['course_key'].value;
-                app.scheduleControl.removeCourseFromSchedule(courseKey);
-                $('#' + popup_id).popup();
-                $('#' + popup_id).popup('close');
-                $('#' + popup_id).popup();
+            $('#' + entryId).click(function() {
+                updatePopup(course)
             });
-            return popup;
-        }
-        buildCalendarPopupForCourse: function(course) {
-            var popup_id = 'popup_calendar' + course.getKey();
-            var popup = '<div class="calendar_popup" data-position-to="window" data-role="popup" id="' + popup_id + '" data-theme="e" data-overlay-theme="a">';
-                    popup += '<h2>' + course.getCourseCode() + '</h2>';
-                    popup += '<p>' + course.getCourseTitle() + '</p>';
-                    for (var j = 0; j < course.getTimeslots().length; ++j) {
-                        popup += '<p class="timeslot">' + course.getTimeslots()[j].getDayString() + ": " + course.getTimeslots()[j].getStartTime() + '-' + course.getTimeslots()[j].getEndTime() + '</p>';
-                    }
-                    popup += '<ul class="options_list" data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
-                    popup += '<li><a href="#info">Details</a></li>';
-                    popup += '<li><a course_key="' + course.getKey() + '"';
-                    popup += ' class="remove_from_calendar_link" href="#">Remove from Schedule</a></li>';
-                    popup += '</ul></div>';
 
-            $('.remove_from_calendar_link').click(function(event) {
-                var courseKey = event.currentTarget.attributes['course_key'].value;
-                app.scheduleControl.removeCourseFromSchedule(courseKey);
-                $('#' + popup_id).popup();
-                $('#' + popup_id).popup('close');
-                $('#' + popup_id).popup();
+            $("a.calendar_entry").hover(function() {
+                var course_entry = $(this).attr('calendar_entry');
+                $("[calendar_entry='" + course_entry + "']" ).addClass("selected");
+            }, function() {
+                var course_entry = $(this).attr('calendar_entry');
+                $("[calendar_entry='" + course_entry + "']" ).removeClass("selected");
             });
-            return popup;
-
         },
-        buildScheduledPopupForCourse: function(course) {
-            var popup_id = 'popup_course_schedule' + course.getKey();
-            var popup = '<div class="calendar_course_schedule" data-position-to="window" data-role="popup" id="' + popup_id + '" data-theme="e" data-overlay-theme="a">';
-                    popup += '<h2>' + course.getCourseCode() + '</h2>';
-                    popup += '<p>' + course.getCourseTitle() + '</p>';
-                    for (var j = 0; j < course.getTimeslots().length; ++j) {
-                        popup += '<p class="timeslot">' + course.getTimeslots()[j].getDayString() + ": " + course.getTimeslots()[j].getStartTime() + '-' + course.getTimeslots()[j].getEndTime() + '</p>';
-                    }
-                    popup += '<ul class="options_list" data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">';
-                    popup += '<li><a href="#info">Details</a></li>';
-                    popup += '<li><a course_key="' + course.getKey() + '"';
-                    popup += ' class="remove_from_schedule_link" href="#">Remove from Schedule</a></li>';
-                    popup += '</ul></div>';
+        refreshPopup: function() {
+            var popup = $('#course_popup');
+            popup.find('.options_list').listview().listview('refresh');
+            popup.find('.options_list').listview('refresh');
+        },
+        updatePopup: function (course, add_to_schedule) {
+            var popupContent = '<p>' + course.getCourseTitle() + '</p>';
+            for (var j = 0; j < course.getTimeslots().length; ++j) {
+                popupContent += '<p class="timeslot">'
+                    + course.getTimeslots()[j].getDayString() + ": "
+                    + course.getTimeslots()[j].getStartTime() + '-'
+                    + course.getTimeslots()[j].getEndTime() + '</p>';
+            }
+
+            var detailsLink = '<li><a href="#info">Details</a></li>';
+            var removeCourseLink = '<li><a course_key="' + course.getKey() + '"'
+                    + ' class="remove_from_schedule_link" href="#">'
+                    + 'Remove from Schedule</a></li>';
+            var addCourseLink = '<li><a course_key="' + course.getKey() + '"'
+                    + ' class="add_to_schedule_link" href="#">'
+                    + 'Add to Schedule</a></li>';
+
+            var popup = $('#course_popup');
+            popup.find('h1').html(course.getCourseCode());
+            popup.find('.popup_content').html(popupContent);
+
+
+            popup.find('ul').empty();
+            popup.find('ul').append(detailsLink);
+            if (!add_to_schedule) {
+                popup.find('ul').append(removeCourseLink);
+            } else {
+                popup.find('ul').append(addCourseLink);
+            }
 
             $('.remove_from_schedule_link').click(function(event) {
                 var courseKey = event.currentTarget.attributes['course_key'].value;
                 app.scheduleControl.removeCourseFromSchedule(courseKey);
-                $('#' + popup_id).popup();
-                $('#' + popup_id).popup('close');
-                $('#' + popup_id).popup();
-
+                popup.popup();
+                popup.popup('close');
             });
 
-            return popup;
+            $('.add_to_schedule_link').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.scheduleControl.addCourseToSchedule(courseKey);
+                popup.popup();
+                popup.popup('close');
+            });
 
+            popup.popup();
+            popup.find('ul').listview().listview('refresh', true);
+            popup.find('ul').listview('refresh', true);
         },
         populateSemesterCalendar: function() {
-            var colorEntries = ['#7AB5A8', '#478E7E', '#256E5D', '#0D4D3F', '#002D23'];
             var calendarIncrement = 10;
             var scheduleCalendar = $('#schedule_calendar');
             scheduleCalendar.empty();
+
             //TODO: get the min and max times
             //TODO: figure out if Sat & Sun need to be displayed
 
@@ -645,11 +623,11 @@ app = {
                 var tableHeader = "<table style='table-layout: fixed; width: 100%' id='calendar-header'>"
                 tableHeader += '<thead><tr>';
                 tableHeader += '<th style="min-width: 45px;width: 45px;"></th>';
-                tableHeader += '<th>Monday</th>';
-                tableHeader += '<th>Tuesday</th>';
-                tableHeader += '<th>Wednesday</th>';
-                tableHeader += '<th>Thursday</th>';
-                tableHeader += '<th>Friday</th>';
+                tableHeader += '<th>MON</th>';
+                tableHeader += '<th>TUES</th>';
+                tableHeader += '<th>WED</th>';
+                tableHeader += '<th>THURS</th>';
+                tableHeader += '<th>FRI</th>';
                 tableHeader += '</tr></thead></table>';
                 $(tableHeader).insertBefore(scheduleCalendar);
             }
@@ -657,7 +635,6 @@ app = {
             var table = '<table style="table-layout: fixed; width: 100%" id="calendar">';
 
             for(var i = minTime; i < maxTime; i = incrementTime(i, calendarIncrement)) {
-               // console.log(i);
                 var borderClass = '';
                 var timeLabel = '';
                 table += '<tr class="' + i.getHours() + i.getMinutes() + '">';
@@ -703,27 +680,30 @@ app = {
                     for (var a = incrementTime(timeBlockStart, calendarIncrement); a < timeBlockEnd; a = incrementTime(a, calendarIncrement)) {
                         rowSpan += 1;
                         // for each row spanned, remove the corresponding cell in the calendar.
-                        var mergeBlock = 'tr.' + a.getHours() + a.getMinutes() + ' > td.day' + timeslot.getDay()
-                        ;
+                        var mergeBlock = 'tr.' + a.getHours() + a.getMinutes() + ' > td.day' + timeslot.getDay();
                         $(mergeBlock).remove();
                     }
                     $(timeBlock).attr('rowspan', rowSpan);
-                    $(timeBlock).css({'background-color': colorEntries[i % colorEntries.length]});
-                    $(timeBlock).html(this.buildCalendarEntry(course));
-
-                    $('.calendar_popup').popup();
-                    $('.options_list').listview().listview('refresh');
+                    this.populateCalendarEntry(course, timeBlock, j);
                 }
             }
 
         },
+        setTitle: function() {
+            $('h1.semester_title').text(app.currentSemester.toString());
+        },
         initialize: function() {
+            this.setTitle();
             this.initCourseList();
             this.populateCourseList();
-            //TODO(carolyn): move this somewhere.
-            $('h2 .semester_name').text = app.currentSemester.toString();
             this.populateSemesterList();
-            this.populateSemesterCalendar();
+
+            // Wait until after the dom has been rendered to populate the calendar
+            // so the cell heights are calculated properly.
+            var control = this;
+            $(document).on("pageshow", "#schedule", function(){
+                control.populateSemesterCalendar();
+            });
         },
     },
 };

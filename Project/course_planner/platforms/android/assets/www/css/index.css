@@ -19,6 +19,10 @@ body {
     width: 100%;
 }
 
+#calendar-header {
+    overflow: hidden;
+}
+
 .table-border-top-light {
     border-top: 1px solid gainsboro;
 }
@@ -81,17 +85,68 @@ td {
     padding-top: 7px;
 }
 
-.courselist_popup, .calendar_popup {
+.course_popup {
     padding: 5px;
     background-color: white;
+    min-width: 240px;
 }
 
-.courselist_popup > h2, .calendar_popup > h2{
+.course_popup > h2 {
     font-size: 1.2em;
 }
 
-.courselist_popup .timeslot, .calendar_popup .timeslot{
+.course_popup .popup_content {
+    padding: 8px 12px;
+}
+
+.course_popup .timeslot {
     color: #777777;
     font-size: 0.8em;
     line-height: 10px;
+}
+
+.calendar_entry {
+    display: block;
+    background-color: #B7A7DB;
+    border-radius: 3px;
+    box-shadow: 1px 1px 4px 1px #655688;
+    padding: 2px 10px;
+    overflow: hidden;
+    text-shadow: none;
+}
+
+a.calendar_entry:hover, a.calendar_entry.selected {
+    background-color: #C6BDDB;
+}
+
+a.calendar_entry, a.calendar_entry:hover {
+    text-decoration: none;
+    text-align: center;
+}
+
+a.calendar_entry h2, a.calendar_entry:hover h2 {
+    color: #22104A;
+    font-size: 14px;
+    margin: 0;
+}
+
+a.calendar_entry h3, a.calendar_entry:hover h3 {
+    color: #6C6016;
+    font-size: 12px;
+    margin: 0;
+    font-weight: normal;
+}
+
+@media only screen and (max-width : 500px) {
+    .calendar_entry {
+        padding: 0px 0px;
+        background-color: blue;
+        word-wrap: break-word;
+    }
+
+    #calendar-header th {
+        font-size: 12px;
+        word-wrap: break-word;
+    }
+
 }

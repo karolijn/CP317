@@ -1,7 +1,5 @@
 app = {
     initialize: function() {
-		document.addEventListener('deviceready', this.onDeviceReady, false);
-
         $('#schedule').on('pagebeforecreate', function() {
             app.scheduleControl.initialize();
 
@@ -15,10 +13,6 @@ app = {
                 height: $(window).height() * 0.5
             });
         });
-    },
-
-    onDeviceReady: function() {
-		FastClick.attach(document.body);
     },
     timeToDateTime: function(timeString) {
         timeArray = timeString.split(':');
@@ -629,11 +623,11 @@ app = {
                 var tableHeader = "<table style='table-layout: fixed; width: 100%' id='calendar-header'>"
                 tableHeader += '<thead><tr>';
                 tableHeader += '<th style="min-width: 45px;width: 45px;"></th>';
-                tableHeader += '<th>Monday</th>';
-                tableHeader += '<th>Tuesday</th>';
-                tableHeader += '<th>Wednesday</th>';
-                tableHeader += '<th>Thursday</th>';
-                tableHeader += '<th>Friday</th>';
+                tableHeader += '<th>MON</th>';
+                tableHeader += '<th>TUES</th>';
+                tableHeader += '<th>WED</th>';
+                tableHeader += '<th>THURS</th>';
+                tableHeader += '<th>FRI</th>';
                 tableHeader += '</tr></thead></table>';
                 $(tableHeader).insertBefore(scheduleCalendar);
             }

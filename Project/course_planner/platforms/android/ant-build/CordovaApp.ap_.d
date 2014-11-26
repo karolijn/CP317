@@ -40,15 +40,10 @@
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/css/index.css \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/img/logo.png \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/index.js \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/fastclick \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/handlebars \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-floatThead \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile-router \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/fastclick/js \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/fastclick/js/fastclick.js \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/handlebars/js \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/handlebars/js/handlebars-v1.3.0.js \
+/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/postmessage.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-floatThead/jquery.floatThead.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-floatThead/jquery.floatThead.min.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile/css \

@@ -14,14 +14,14 @@ https://github.com/app-o-mat/jqm-cordova-template-project/LICENSE.md
 	<meta name="format-detection" content="telephone=no" />
 	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, target-densitydpi=device-dpi" />
 
-	<title>App-o-Mat</title>
+	<title>Laurier Course Scheduler</title>
 
 	<link rel="stylesheet" href="css/index.css">
 	<link rel="stylesheet" href="lib/jquery-mobile/css/jquery.mobile-1.4.5.css" />
 
 	<script type="text/javascript" src="lib/jquery-mobile/js/jquery-1.11.1.js"></script>
-    <script type="text/javascript" src="lib/jquery-floatThead/jquery.floatThead.js"></script>
-	<script type="text/javascript" src="lib/jquery-mobile-router/js/jquery.mobile.router.min.js"></script>
+    <!--script type="text/javascript" src="lib/jquery-floatThead/jquery.floatThead.js"></script>
+	<script type="text/javascript" src="lib/jquery-mobile-router/js/jquery.mobile.router.min.js"></script-->
 	<script type="text/javascript" src="lib/jquery-mobile/js/jquery.mobile-1.4.5.js"></script>
 	<script type="text/javascript" src="js/index.js"></script>
 </head>
@@ -40,7 +40,7 @@ https://github.com/app-o-mat/jqm-cordova-template-project/LICENSE.md
 
 <div data-role="page" id="schedule">
 	<div data-theme="a" data-role="header" data-position="fixed">
-		<h1>Schedule Page</h1><a href="#home" data-transition="slide" data-direction="reverse" data-icon="arrow-l" class="ui-btn-left">Home</a>
+		<h1 class="semester_title">Schedule Page</h1><a href="#home" data-transition="slide" data-direction="reverse" data-icon="arrow-l" class="ui-btn-left">Home</a>
 	</div>
 
 	<div data-role="content" class="ui-content">
@@ -49,7 +49,7 @@ https://github.com/app-o-mat/jqm-cordova-template-project/LICENSE.md
         </div>
         <div data-role="collapsible" data-inset="false">
             <h2>Scheduled Courses</h2>
-            <ul data-role="listview" data-inset="true" data-theme="b" class="schedule_list">
+            <ul id="schedule_list" data-role="listview" data-inset="true" data-theme="b" class="schedule_list">
             </ul>
         </div>
         <div data-role="collapsible" data-inset="false">
@@ -57,16 +57,27 @@ https://github.com/app-o-mat/jqm-cordova-template-project/LICENSE.md
             <form class="ui-filterable">
                  <input id="course_name_filter" data-type="search" placeholder="search for course">
             </form>
-            <ul data-role="listview" data-role="collapsible" data-inset="true" data-theme="b" id="course_list" class="course_list" data-filter="true"
+            <ul id="course_list" data-role="listview" data-role="collapsible" data-inset="true" data-theme="b" class="course_list" data-filter="true"
             data-input="#course_name_filter">
             </ul>
         </div>
 	</div>
+
+    <div class="course_popup" id="course_popup" data-position-to="window" data-role="popup"
+        data-theme="e" data-overlay-theme="a">
+        <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+        <div data-role="header" data-theme="a" class="ui-corner-top popup_header">
+                <h1>HEADER</h1>
+        </div>
+        <div class="popup_content">description</div>
+        <ul class="options_list" data-role="listview" data-inset="true" data-theme="d">
+            <li>Hi</li>
+            <li>there</li>
+        </ul>
+    </div>
 </div>
 
 <script type="text/javascript" src="cordova.js"></script>
-<script type="text/javascript" src="lib/fastclick/js/fastclick.js"></script>
-<script type="text/javascript" src="lib/handlebars/js/handlebars-v1.3.0.js"></script>
 
 <script type="text/javascript">
 	app.initialize();
