@@ -40,12 +40,7 @@
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/css/index.css \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/img/logo.png \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/index.js \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-floatThead \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile-router \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/postmessage.js \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-floatThead/jquery.floatThead.js \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-floatThead/jquery.floatThead.min.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile/css \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile/js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile/css/images \
@@ -270,9 +265,6 @@
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile/js/jquery.mobile-1.4.5.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile/js/jquery.mobile-1.4.5.min.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile/js/jquery.mobile-1.4.5.min.map \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile-router/js \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile-router/js/jquery.mobile.router.js \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/lib/jquery-mobile-router/js/jquery.mobile.router.min.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/plugins/org.apache.cordova.dialogs \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/plugins/org.apache.cordova.splashscreen \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/plugins/org.apache.cordova.statusbar \
