@@ -263,6 +263,11 @@ app = {
         this.getTerm = function() {
             return term;
         };
+        this.getTermString = function() {
+            return Object.keys(app.TERMS).filter(function(key) {
+                return app.TERMS[key] === term;
+            })[0];
+        }
         this.getYear = function() {
             return year;
         };
@@ -270,7 +275,7 @@ app = {
             return courses;
         };
         this.toString = function() {
-            return term + " " + year;
+            return this.getTermString() + " " + year;
         };
         this.removeCourse = function(courseKey) {
             courses[courseKey].delete();
@@ -410,7 +415,6 @@ app = {
                 .addCourse(CM412);
         }
     },
-
     getScheduleForCurrentSemester: function() {
         var semesterKey = app.currentSemester.getKey();
         if (!localStorage.getItem(semesterKey)) {
@@ -444,7 +448,6 @@ app = {
           var schedule = app.getScheduleForCurrentSemester();
           try {
               schedule.addCourse(app.currentSemester.getCourse(courseKey));
-
 
               app.updateScheduleForCurrentSemester(schedule);
               app.scheduleControl.populateCourseList();
@@ -520,25 +523,41 @@ app = {
                 this.addCourseListItem(course, listId, updatePopup(course));
             }
         },
-        populateCalendarEntry: function(course, element, timeslotId) {
+        populateCalendarEntry: function(course, timeslotCell, timeslotId) {
+            var colorEntries = ['#7AB5A8', '#478E7E', '#256E5D', '#0D4D3F', '#002D23'];
             var control = this;
             var updatePopup = function(course) {
                 return function() {
                     control.updatePopup(course, false /* add to schedule */);
                 }();
             }
-            var elementId = "calendar_entry_" + course.getKey() + timeslotId;
-            var calendarHtml = '<a id="' + elementId + '" href="#course_popup" data-rel="popup">';
+            var entryId = "calendar_entry_" + course.getKey() + timeslotId;
+            var calendarHtml = '<a class="calendar_entry" calendar_entry="' + course.getKey()
+                +'" id="' + entryId + '" href="#course_popup" data-rel="popup">';
             calendarHtml += '<div class="details">';
             calendarHtml += '<h2>' + course.getCourseCode() + "</h2>";
             calendarHtml += '<h3>' + course.getCourseTitle() + "</h3>";
             calendarHtml += '</div></a>';
 
-            $(element).html(calendarHtml);
+            $(timeslotCell).html(calendarHtml);
 
-            $('#' + elementId).click(function() {
+            // adjust entry height to fill table cell.
+            $('#' + entryId).height($(timeslotCell).height());
+
+            $('#' + entryId).click(function() {
                 updatePopup(course)
             });
+
+            $("a.calendar_entry").hover(function() {
+                var course_entry = $(this).attr('calendar_entry');
+                $("[calendar_entry='" + course_entry + "']" ).addClass("selected");
+            }, function() {
+                var course_entry = $(this).attr('calendar_entry');
+                $("[calendar_entry='" + course_entry + "']" ).removeClass("selected");
+            });
+
+           // $(calendarHtml).css({'background-color': colorEntries[i % colorEntries.length]});
+
           //  $('.options_list').listview().listview('refresh');
           //  $('.options_list').listview('refresh')
           //  this.refreshPopup();
@@ -566,7 +585,7 @@ app = {
                     + 'Add to Schedule</a></li>';
 
             var popup = $('#course_popup');
-            popup.find('h2').html(course.getCourseCode());
+            popup.find('h1').html(course.getCourseCode());
             popup.find('.popup_content').html(popupContent);
 
 
@@ -597,10 +616,10 @@ app = {
             popup.find('ul').listview('refresh', true);
         },
         populateSemesterCalendar: function() {
-            var colorEntries = ['#7AB5A8', '#478E7E', '#256E5D', '#0D4D3F', '#002D23'];
             var calendarIncrement = 10;
             var scheduleCalendar = $('#schedule_calendar');
             scheduleCalendar.empty();
+
             //TODO: get the min and max times
             //TODO: figure out if Sat & Sun need to be displayed
 
@@ -628,7 +647,6 @@ app = {
             var table = '<table style="table-layout: fixed; width: 100%" id="calendar">';
 
             for(var i = minTime; i < maxTime; i = incrementTime(i, calendarIncrement)) {
-               // console.log(i);
                 var borderClass = '';
                 var timeLabel = '';
                 table += '<tr class="' + i.getHours() + i.getMinutes() + '">';
@@ -674,28 +692,30 @@ app = {
                     for (var a = incrementTime(timeBlockStart, calendarIncrement); a < timeBlockEnd; a = incrementTime(a, calendarIncrement)) {
                         rowSpan += 1;
                         // for each row spanned, remove the corresponding cell in the calendar.
-                        var mergeBlock = 'tr.' + a.getHours() + a.getMinutes() + ' > td.day' + timeslot.getDay()
-                        ;
+                        var mergeBlock = 'tr.' + a.getHours() + a.getMinutes() + ' > td.day' + timeslot.getDay();
                         $(mergeBlock).remove();
                     }
                     $(timeBlock).attr('rowspan', rowSpan);
-                    $(timeBlock).css({'background-color': colorEntries[i % colorEntries.length]});
                     this.populateCalendarEntry(course, timeBlock, j);
-
-
-                   // $('.calendar_popup').popup();
-                  //  $('.options_list').listview().listview('refresh');
                 }
             }
 
         },
+        setTitle: function() {
+            $('h1.semester_title').text(app.currentSemester.toString());
+        },
         initialize: function() {
+            this.setTitle();
             this.initCourseList();
             this.populateCourseList();
-            //TODO(carolyn): move this somewhere.
-            $('h2 .semester_name').text = app.currentSemester.toString();
             this.populateSemesterList();
-            this.populateSemesterCalendar();
+
+            // Wait until after the dom has been rendered to populate the calendar
+            // so the cell heights are calculated properly.
+            var control = this;
+            $(document).on("pageshow", "#schedule", function(){
+                control.populateSemesterCalendar();
+            });
         },
     },
 };
