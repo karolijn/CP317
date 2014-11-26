@@ -9,6 +9,10 @@ app = {
         });
 		$('#info').on('pagebeforecreate', function() {
 			app.viewCourseDetailsControl.initialize();
+			
+			$('#course_info').css({
+                width: $(window).width()
+            });
 		});
 		
         $(window).on('resize', function() {
