@@ -14,6 +14,9 @@ app = {
             });
         });
     },
+    /*
+     * Utility function to convert from 24:00h [timeString] to a DateTime object.
+     */
     timeToDateTime: function(timeString) {
         timeArray = timeString.split(':');
         return new Date(0, 0, 0, timeArray[0], timeArray[1], 0, 0);
@@ -104,10 +107,15 @@ app = {
             return this;
         };
     },
+    /**
+     * Class representing a schedule. A schedule is unique to the current localstorage
+     * and semester combination.
+     */
     Schedule: function() {
         var courses = {};
 
         // A timetable for each day containing ordered arrays of scheduled events.
+        // this is a private object used for course collision detection.
         var timetable = [];
         timetable[app.DAYS.Monday] = [];
         timetable[app.DAYS.Tuesday] = [];
@@ -115,7 +123,9 @@ app = {
         timetable[app.DAYS.Thursday] = [];
         timetable[app.DAYS.Friday] = [];
 
-        // An object containing ordered arrays of time entries for easy lookup/comparison.
+        /**
+        * Class containing ordered arrays of time entries for easy lookup/comparison.
+        */
         ScheduleEvent = function(timestamp, courseKey, start){
             var timeStamp = timestamp;
             var courseKey = courseKey;
@@ -141,6 +151,7 @@ app = {
             }
         }
 
+        // Add [course] to the current schedule.
         this.addCourse = function(course) {
             try {
               addCourseToTimetable(course);
@@ -152,6 +163,8 @@ app = {
             return this;
         };
 
+        // Private method to add the course to a timetable. This is used for
+        // collision detection.
         var addCourseToTimetable = function(course) {
             for (var i = 0; i < course.getTimeslots().length; ++i) {
               var courseTimeslot = course.getTimeslots()[i];
@@ -198,6 +211,8 @@ app = {
               }
             }
         };
+
+        // Private method to remove a course from the timetable.
         var removeCourseFromTimetable = function(course) {
             for (var i = 0; i < course.getTimeslots().length; ++i) {
                 // for each timeslot a course has, find it on the schedule and remove it.
