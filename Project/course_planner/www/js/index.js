@@ -2,12 +2,15 @@ app = {
     initialize: function() {
         $('#schedule').on('pagebeforecreate', function() {
             app.scheduleControl.initialize();
-
+			
             $('#schedule_calendar').css({
                 height: $(window).height() * 0.5
             });
         });
-
+		$('#info').on('pagebeforecreate', function() {
+			app.viewCourseDetailsControl.initialize();
+		});
+		
         $(window).on('resize', function() {
             $('#schedule_calendar').css({
                 height: $(window).height() * 0.5
@@ -100,7 +103,7 @@ app = {
             return this;
         };
         this.setProfessor = function(value) {
-            provessor = value;
+            professor = value;
             return this;
         };
     },
@@ -564,7 +567,7 @@ app = {
                     + course.getTimeslots()[j].getEndTime() + '</p>';
             }
 
-            var detailsLink = '<li><a href="#info">Details</a></li>';
+            var detailsLink = '<li><a href="#info" a course_key="' + course.getKey() + '"class="course_info_link">Details</a></li>';
             var removeCourseLink = '<li><a course_key="' + course.getKey() + '"'
                     + ' class="remove_from_schedule_link" href="#">'
                     + 'Remove from Schedule</a></li>';
@@ -585,6 +588,11 @@ app = {
                 popup.find('ul').append(addCourseLink);
             }
 
+			$('.course_info_link').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.viewCourseDetailsControl.setCourse(courseKey);
+            });
+			
             $('.remove_from_schedule_link').click(function(event) {
                 var courseKey = event.currentTarget.attributes['course_key'].value;
                 app.scheduleControl.removeCourseFromSchedule(courseKey);
@@ -704,6 +712,42 @@ app = {
             $(document).on("pageshow", "#schedule", function(){
                 control.populateSemesterCalendar();
             });
+        },
+    },
+	viewCourseDetailsControl: {
+		course: '',
+		setCourse: function(courseKey) {
+			course = app.currentSemester.getCourse(courseKey);
+		},
+		setTitle: function() {
+            $('h1.info_title').text(course.getCourseCode);
+        },
+        initialize: function() {
+			this.setTitle();
+			
+            // Wait until after the dom has been rendered to populate the calendar
+            // so the cell heights are calculated properly.
+            var control = this;
+            $(document).on("pageshow", "#info", function(){
+                control.populateCourseInfo();
+            });
+        },
+		populateCourseInfo: function() {
+			timeslots = '<tr> <th>Timeslots</th> <td>';
+			for (i = 0; i < course.getTimeslots().length; i++) {
+				timeslots+= course.getTimeslots()[i].getDayString() +', ' + course.getTimeslots()[i].getStartTime()+', ' +course.getTimeslots()[i].getEndTime() +'<br>';
+			}
+			timeslots+='</td> </tr>';
+			table_data = '<tr> <th>Course Code</th> <td>'+course.getCourseCode()+'</td> </tr>'+
+						 '<tr> <th>Course Title</th> <td>'+course.getCourseTitle()+'</td> </tr>'+
+						 '<tr> <th>Subject</th> <td>'+course.getSubject()+'</td> </tr>'+
+						 '<tr> <th>Section</th> <td>'+course.getSection()+'</td> </tr>'+
+						 '<tr> <th>Semester</th> <td>'+course.getSemester().getTerm()+', '+ course.getSemester().getYear()+'</td> </tr>'+
+						 timeslots+
+						 '<tr> <th>Description</th> <td>'+course.getDescription()+'</td> </tr>'+
+						 '<tr> <th>Location</th> <td>'+course.getLocation()+'</td> </tr>'+
+						 '<tr> <th>Professor</th> <td>'+course.getProfessor()+'</td> </tr>'
+            $('table.course_info').html(table_data);
         },
     },
 };
