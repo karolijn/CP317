@@ -2,19 +2,19 @@ app = {
     initialize: function() {
         $('#schedule').on('pagebeforecreate', function() {
             app.scheduleControl.initialize();
-			
+
             $('#schedule_calendar').css({
                 height: $(window).height() * 0.5
             });
         });
 		$('#info').on('pagebeforecreate', function() {
 			app.viewCourseDetailsControl.initialize();
-			
+
 			$('#course_info').css({
                 width: $(window).width()
             });
 		});
-		
+
         $(window).on('resize', function() {
             $('#schedule_calendar').css({
                 height: $(window).height() * 0.5
@@ -131,7 +131,7 @@ app = {
         timetable[app.DAYS.Friday] = [];
 
         /**
-        * Class containing ordered arrays of time entries for easy lookup/comparison.
+        * Structure containing ordered arrays of time entries for easy lookup/comparison.
         */
         ScheduleEvent = function(timestamp, courseKey, start){
             var timeStamp = timestamp;
@@ -501,7 +501,7 @@ app = {
                     var control = this;
                     var updatePopup = function(course) {
                         return function() {
-                            control.updatePopup(course, true /* add to schedule */);
+                            control.updatePopup(course, false /* is scheduled */);
                         }
                     }
 
@@ -532,7 +532,7 @@ app = {
                 var control = this;
                 var updatePopup = function(course) {
                     return function() {
-                        control.updatePopup(course, false /* add to schedule */);
+                        control.updatePopup(course, true /* is scheduled */);
                     }
                 }
 
@@ -544,7 +544,7 @@ app = {
             var control = this;
             var updatePopup = function(course) {
                 return function() {
-                    control.updatePopup(course, false /* add to schedule */);
+                    control.updatePopup(course, true /* is scheduled */);
                 }();
             }
             var entryId = "calendar_entry_" + course.getKey() + timeslotId;
@@ -572,12 +572,7 @@ app = {
                 $("[calendar_entry='" + course_entry + "']" ).removeClass("selected");
             });
         },
-        refreshPopup: function() {
-            var popup = $('#course_popup');
-            popup.find('.options_list').listview().listview('refresh');
-            popup.find('.options_list').listview('refresh');
-        },
-        updatePopup: function (course, add_to_schedule) {
+        updatePopup: function (course, isScheduled) {
             var popupContent = '<p>' + course.getCourseTitle() + '</p>';
             for (var j = 0; j < course.getTimeslots().length; ++j) {
                 popupContent += '<p class="timeslot">'
@@ -601,7 +596,7 @@ app = {
 
             popup.find('ul').empty();
             popup.find('ul').append(detailsLink);
-            if (!add_to_schedule) {
+            if (isScheduled) {
                 popup.find('ul').append(removeCourseLink);
             } else {
                 popup.find('ul').append(addCourseLink);
@@ -611,7 +606,7 @@ app = {
                 var courseKey = event.currentTarget.attributes['course_key'].value;
                 app.viewCourseDetailsControl.setCourse(courseKey);
             });
-			
+
             $('.remove_from_schedule_link').click(function(event) {
                 var courseKey = event.currentTarget.attributes['course_key'].value;
                 app.scheduleControl.removeCourseFromSchedule(courseKey);
@@ -743,7 +738,7 @@ app = {
         },
         initialize: function() {
 			this.setTitle();
-			
+
             // Wait until after the dom has been rendered to populate the calendar
             // so the cell heights are calculated properly.
             var control = this;

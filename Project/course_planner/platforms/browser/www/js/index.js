@@ -2,18 +2,28 @@ app = {
     initialize: function() {
         $('#schedule').on('pagebeforecreate', function() {
             app.scheduleControl.initialize();
-
+			
             $('#schedule_calendar').css({
                 height: $(window).height() * 0.5
             });
         });
-
+		$('#info').on('pagebeforecreate', function() {
+			app.viewCourseDetailsControl.initialize();
+			
+			$('#course_info').css({
+                width: $(window).width()
+            });
+		});
+		
         $(window).on('resize', function() {
             $('#schedule_calendar').css({
                 height: $(window).height() * 0.5
             });
         });
     },
+    /*
+     * Utility function to convert from 24:00h [timeString] to a DateTime object.
+     */
     timeToDateTime: function(timeString) {
         timeArray = timeString.split(':');
         return new Date(0, 0, 0, timeArray[0], timeArray[1], 0, 0);
@@ -100,14 +110,19 @@ app = {
             return this;
         };
         this.setProfessor = function(value) {
-            provessor = value;
+            professor = value;
             return this;
         };
     },
+    /**
+     * Class representing a schedule. A schedule is unique to the current localstorage
+     * and semester combination.
+     */
     Schedule: function() {
         var courses = {};
 
         // A timetable for each day containing ordered arrays of scheduled events.
+        // this is a private object used for course collision detection.
         var timetable = [];
         timetable[app.DAYS.Monday] = [];
         timetable[app.DAYS.Tuesday] = [];
@@ -115,7 +130,9 @@ app = {
         timetable[app.DAYS.Thursday] = [];
         timetable[app.DAYS.Friday] = [];
 
-        // An object containing ordered arrays of time entries for easy lookup/comparison.
+        /**
+        * Class containing ordered arrays of time entries for easy lookup/comparison.
+        */
         ScheduleEvent = function(timestamp, courseKey, start){
             var timeStamp = timestamp;
             var courseKey = courseKey;
@@ -141,6 +158,7 @@ app = {
             }
         }
 
+        // Add [course] to the current schedule.
         this.addCourse = function(course) {
             try {
               addCourseToTimetable(course);
@@ -152,6 +170,8 @@ app = {
             return this;
         };
 
+        // Private method to add the course to a timetable. This is used for
+        // collision detection.
         var addCourseToTimetable = function(course) {
             for (var i = 0; i < course.getTimeslots().length; ++i) {
               var courseTimeslot = course.getTimeslots()[i];
@@ -198,6 +218,8 @@ app = {
               }
             }
         };
+
+        // Private method to remove a course from the timetable.
         var removeCourseFromTimetable = function(course) {
             for (var i = 0; i < course.getTimeslots().length; ++i) {
                 // for each timeslot a course has, find it on the schedule and remove it.
@@ -564,7 +586,7 @@ app = {
                     + course.getTimeslots()[j].getEndTime() + '</p>';
             }
 
-            var detailsLink = '<li><a href="#info">Details</a></li>';
+            var detailsLink = '<li><a href="#info" a course_key="' + course.getKey() + '"class="course_info_link">Details</a></li>';
             var removeCourseLink = '<li><a course_key="' + course.getKey() + '"'
                     + ' class="remove_from_schedule_link" href="#">'
                     + 'Remove from Schedule</a></li>';
@@ -585,6 +607,11 @@ app = {
                 popup.find('ul').append(addCourseLink);
             }
 
+			$('.course_info_link').click(function(event) {
+                var courseKey = event.currentTarget.attributes['course_key'].value;
+                app.viewCourseDetailsControl.setCourse(courseKey);
+            });
+			
             $('.remove_from_schedule_link').click(function(event) {
                 var courseKey = event.currentTarget.attributes['course_key'].value;
                 app.scheduleControl.removeCourseFromSchedule(courseKey);
@@ -623,11 +650,11 @@ app = {
                 var tableHeader = "<table style='table-layout: fixed; width: 100%' id='calendar-header'>"
                 tableHeader += '<thead><tr>';
                 tableHeader += '<th style="min-width: 45px;width: 45px;"></th>';
-                tableHeader += '<th>Monday</th>';
-                tableHeader += '<th>Tuesday</th>';
-                tableHeader += '<th>Wednesday</th>';
-                tableHeader += '<th>Thursday</th>';
-                tableHeader += '<th>Friday</th>';
+                tableHeader += '<th>MON</th>';
+                tableHeader += '<th>TUES</th>';
+                tableHeader += '<th>WED</th>';
+                tableHeader += '<th>THURS</th>';
+                tableHeader += '<th>FRI</th>';
                 tableHeader += '</tr></thead></table>';
                 $(tableHeader).insertBefore(scheduleCalendar);
             }
@@ -704,6 +731,42 @@ app = {
             $(document).on("pageshow", "#schedule", function(){
                 control.populateSemesterCalendar();
             });
+        },
+    },
+	viewCourseDetailsControl: {
+		course: '',
+		setCourse: function(courseKey) {
+			course = app.currentSemester.getCourse(courseKey);
+		},
+		setTitle: function() {
+            $('h1.info_title').text(course.getCourseCode);
+        },
+        initialize: function() {
+			this.setTitle();
+			
+            // Wait until after the dom has been rendered to populate the calendar
+            // so the cell heights are calculated properly.
+            var control = this;
+            $(document).on("pageshow", "#info", function(){
+                control.populateCourseInfo();
+            });
+        },
+		populateCourseInfo: function() {
+			timeslots = '<tr> <th>Timeslots</th> <td>';
+			for (i = 0; i < course.getTimeslots().length; i++) {
+				timeslots+= course.getTimeslots()[i].getDayString() +', ' + course.getTimeslots()[i].getStartTime()+', ' +course.getTimeslots()[i].getEndTime() +'<br>';
+			}
+			timeslots+='</td> </tr>';
+			table_data = '<tr> <th>Course Code</th> <td>'+course.getCourseCode()+'</td> </tr>'+
+						 '<tr> <th>Course Title</th> <td>'+course.getCourseTitle()+'</td> </tr>'+
+						 '<tr> <th>Subject</th> <td>'+course.getSubject()+'</td> </tr>'+
+						 '<tr> <th>Section</th> <td>'+course.getSection()+'</td> </tr>'+
+						 '<tr> <th>Semester</th> <td>'+course.getSemester().getTerm()+', '+ course.getSemester().getYear()+'</td> </tr>'+
+						 timeslots+
+						 '<tr> <th>Description</th> <td>'+course.getDescription()+'</td> </tr>'+
+						 '<tr> <th>Location</th> <td>'+course.getLocation()+'</td> </tr>'+
+						 '<tr> <th>Professor</th> <td>'+course.getProfessor()+'</td> </tr>'
+            $('table.course_info').html(table_data);
         },
     },
 };
