@@ -423,12 +423,24 @@ app = {
                 .setLocation("address goes here?")
                 .setProfessor("Fred Flintstone");
 
+
+            var emptyCourse = new app.Course()
+                .setCourseCode("EM400")
+                .setCourseTitle("Empty Course")
+                .setSubject("EM")
+                .setSection("A")
+                .setSemester(new app.Semester("Fall", "2014"))
+                .setDescription("A test empty course without timeslots and a TBA location/professor")
+                .setLocation("TBA")
+                .setProfessor("TBA");
+
             app.currentSemester
                 .addCourse(CP317)
                 .addCourse(CP213)
                 .addCourse(AC213)
                 .addCourse(CM102)
                 .addCourse(CM412);
+                .addCourse(emptyCourse);
         }
     },
     getScheduleForCurrentSemester: function() {
