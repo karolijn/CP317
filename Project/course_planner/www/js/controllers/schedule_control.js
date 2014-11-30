@@ -1,4 +1,3 @@
-
 /*
  * Controller object that controls the current schedule page and data.
  */
@@ -270,7 +269,7 @@ coursePlanner.scheduleControl = {
 
     },
     setTitle: function() {
-        $('h1.semester_title').text(coursePlanner.currentSemester.toString());
+        $('h1.semester_title').text(coursePlanner.currentSemester.get().toString());
     },
     initialize: function() {
         this.setTitle();
