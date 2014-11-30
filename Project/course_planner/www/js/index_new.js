@@ -16,6 +16,7 @@ importScript('../www/js/entities/semester.js');
 importScript('../www/js/controllers/course_details_control.js');
 importScript('../www/js/controllers/schedule_control.js');
 importScript('../www/js/controllers/semester_control.js');
+importScript('../www/js/controllers/export_to_ical_control.js');
 
 
 /*
