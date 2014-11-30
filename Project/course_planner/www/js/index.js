@@ -23,6 +23,11 @@ importScript('../www/js/controllers/export_to_ical_control.js');
  * Initialization of the application.
  */
 coursePlanner.initialize = function() {
+    //Fill Select Semesters Dropdown menu
+    $('#home').on('pageload', function() {
+        coursePlanner.semesterControl.initialize();
+    });
+
     // Initialize and size the schedule calendar on the schedule page.
     $('#schedule').on('pagebeforecreate', function() {
         coursePlanner.scheduleControl.initialize();

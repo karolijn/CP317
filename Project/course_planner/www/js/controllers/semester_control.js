@@ -5,9 +5,29 @@ coursePlanner.semesterControl = {
     //Initialize new semester
     setSemester: function() {
         coursePlanner.currentSemester.set(new coursePlanner.Semester(coursePlanner.TERMS.Fall, "2014"));
-        this.loadFakeCourses();
+        // this.loadFakeCourses();
     },
-    //TODO: replace this with an actual query to loris.
+    getSemesters:function() {
+        alert();
+        $.ajax({
+            type:'GET',
+            url: 'https://query.yahooapis.com/v1/public/yql?q=select+%2A+from+html+where+url%3D%22https%3A%2F%2Ftelaris.wlu.ca%2Fssb_prod%2Fbwckschd.p_disp_dyn_sched%22&format=json&diagnostics=true&callback',
+            dataType:'json'
+        }).done(function( data ) {
+            var semeseterSelectMenu = data["query"]["results"]["body"]["div"]["3"]["form"]["table"]["tr"]["td"]["select"]["option"];
+    
+            for (var item in semeseterSelectMenu) {
+                var x = semeseterSelectMenu[item];
+
+                if (x["value"] != "") {
+                    var content = x["content"].split(" ");
+                    var newOption = "<option value='" + x["value"]+ "'>" + content[0] + " " + content[1] + "</option>";
+                    $("#semesters").append(newOption);
+                }
+            }
+            $("select").selectmenu('refresh');
+        });
+    },
     loadFakeCourses: function() {
         var CP317 = new coursePlanner.Course()
             .setCourseCode("CP317")
@@ -89,5 +109,8 @@ coursePlanner.semesterControl = {
             .addCourse(CM412)
             .addCourse(emptyCourse);
         coursePlanner.currentSemester.set(semester);
+    },
+    initialize: function() {
+        this.getSemesters();
     }
 };
