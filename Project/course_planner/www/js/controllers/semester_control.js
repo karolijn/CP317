@@ -15,7 +15,7 @@ coursePlanner.semesterControl = {
             dataType:'json'
         }).done(function( data ) {
             var semeseterSelectMenu = data["query"]["results"]["body"]["div"]["3"]["form"]["table"]["tr"]["td"]["select"]["option"];
-    
+
             for (var item in semeseterSelectMenu) {
                 var x = semeseterSelectMenu[item];
 
@@ -111,6 +111,7 @@ coursePlanner.semesterControl = {
         coursePlanner.currentSemester.set(semester);
     },
     initialize: function() {
+        alert('bananana');
         this.getSemesters();
     }
 };

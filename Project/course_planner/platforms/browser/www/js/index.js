@@ -1,28 +1,15 @@
 coursePlanner = {}
 
-importScript = function(path) {
-    var script = document.createElement('script');
-    script.src = path;
-    document.head.appendChild(script);
-}
-
-importScript('../www/js/utilities.js');
-importScript('../www/js/enums.js');
-importScript('../www/js/entities/timeslot.js');
-importScript('../www/js/entities/course.js');
-importScript('../www/js/entities/errors.js');
-importScript('../www/js/entities/schedule.js');
-importScript('../www/js/entities/semester.js');
-importScript('../www/js/controllers/course_details_control.js');
-importScript('../www/js/controllers/schedule_control.js');
-importScript('../www/js/controllers/semester_control.js');
-importScript('../www/js/controllers/export_to_ical_control.js');
-
-
 /*
  * Initialization of the application.
  */
 coursePlanner.initialize = function() {
+    //Fill Select Semesters Dropdown menu
+    $('#home').on('pagebeforecreate', function() {
+        alert('banana');
+        coursePlanner.semesterControl.initialize();
+    });
+
     // Initialize and size the schedule calendar on the schedule page.
     $('#schedule').on('pagebeforecreate', function() {
         coursePlanner.scheduleControl.initialize();

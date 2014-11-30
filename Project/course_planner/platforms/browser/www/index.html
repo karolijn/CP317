@@ -12,7 +12,19 @@
 
 	<script type="text/javascript" src="lib/jquery-mobile/js/jquery-1.11.1.js"></script>
 	<script type="text/javascript" src="lib/jquery-mobile/js/jquery.mobile-1.4.5.js"></script>
-	<script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src='js/utilities.js'></script>
+    <script type="text/javascript" src='js/enums.js'></script>
+    <script type="text/javascript" src='js/entities/timeslot.js'></script>
+    <script type="text/javascript" src='js/entities/course.js'></script>
+    <script type="text/javascript" src='js/entities/errors.js'></script>
+    <script type="text/javascript" src='js/entities/schedule.js'></script>
+    <script type="text/javascript" src='js/entities/semester.js'></script>
+    <script type="text/javascript" src='js/controllers/course_details_control.js'></script>
+    <script type="text/javascript" src='js/controllers/schedule_control.js'></script>
+    <script type="text/javascript" src='js/controllers/semester_control.js'></script>
+    <script type="text/javascript" src='js/controllers/export_to_ical_control.js'></script>
+
 </head>
 
 <body>
@@ -22,7 +34,15 @@
 	</div>
 
 	<div role="main" class="ui-content" id="home-content">
-		<h2>This is where the select semester stuff goes.</h2>
+<!-- 		<h2>This is where the select semester stuff goes.</h2> -->
+		<form>
+  			<fieldset class="ui-field-contain">
+    			<label for="semesters">Select Semester</label>
+    			<select name="semesters" id="semesters">
+    			</select>
+  			</fieldset>
+		</form>
+
 		<p><a href="#schedule" onclick="coursePlanner.semesterControl.setSemester();">Go</a></p>
 	</div>
 </div>
