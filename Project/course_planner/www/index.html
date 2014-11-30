@@ -23,7 +23,7 @@
 
 	<div role="main" class="ui-content" id="home-content">
 		<h2>This is where the select semester stuff goes.</h2>
-		<p><a href="#schedule" onclick="app.selectSemesterControl.setSemester();">Go</a></p>
+		<p><a href="#schedule" onclick="coursePlanner.semesterControl.setSemester();">Go</a></p>
 	</div>
 </div>
 
@@ -70,7 +70,7 @@
 	<div data-theme="a" data-role="header" data-position="fixed">
 		<h1 class="info_title">Course Details</h1><a href="#schedule" data-transition="slide" data-direction="reverse" data-icon="arrow-l" class="ui-btn-left">Schedule</a>
 	</div>
-	
+
 	<div role="content" class="ui-content">
 		<table class="course_info"></table>
 	</div>
@@ -80,7 +80,7 @@
 <script type="text/javascript" src="cordova.js"></script>
 
 <script type="text/javascript">
-	app.initialize();
+	coursePlanner.initialize();
 </script>
 
 </body>
