@@ -439,7 +439,7 @@ app = {
                 .addCourse(CP213)
                 .addCourse(AC213)
                 .addCourse(CM102)
-                .addCourse(CM412);
+                .addCourse(CM412)
                 .addCourse(emptyCourse);
         }
     },
@@ -704,6 +704,9 @@ app = {
             var courseKeys = currentSchedule.getCourseKeys();
             for (var i = 0; i < courseKeys.length; ++i) {
                 var course = app.currentSemester.getCourse(courseKeys[i]);
+                if (course.getTimeslots().length < 1) {
+                    alert(course.getCourseCode() + "'s timeslots are TBD. It will be added to the course list but cannot be scheduled.")
+                }
                 for (var j = 0; j < course.getTimeslots().length; ++j) {
                     var timeslot = course.getTimeslots()[j];
 
