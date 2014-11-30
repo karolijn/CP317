@@ -29,7 +29,7 @@ coursePlanner.scheduleControl = {
           $('.course_list').listview("refresh");
           $('.schedule_list').listview("refresh");
       } catch (e) {
-        alert(e);
+        alert(e.message);
       }
     },
     removeCourseFromSchedule: function(courseKey) {
