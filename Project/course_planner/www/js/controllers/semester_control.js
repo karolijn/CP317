@@ -4,11 +4,28 @@
 coursePlanner.semesterControl = {
     //Initialize new semester
     setSemester: function() {
-        coursePlanner.currentSemester.set(new coursePlanner.Semester(coursePlanner.TERMS.Fall, "2014"));
+        var chosenTerm = $("#semesters").val();
+        alert(chosenTerm);
+        var year = chosenTerm.slice(0,4);
+        var season = coursePlanner.utilities.getSeason(chosenTerm.slice(4));
+
+        coursePlanner.currentSemester.set(new coursePlanner.Semester(season, year));
+        this.getCourses(chosenTerm);
+
+        $.mobile.loading( 'show', {
+            text: 'Loading Courses',
+            textVisible: true,
+            html: ""
+        });
+        // coursePlanner.currentSemester.set(new coursePlanner.Semester(coursePlanner.TERMS.Fall, "2014"));
         // this.loadFakeCourses();
     },
     getSemesters:function() {
-        alert();
+        $.mobile.loading( 'show', {
+            text: 'Loading Semesters',
+            textVisible: true,
+            html: ""
+        });
         $.ajax({
             type:'GET',
             url: 'https://query.yahooapis.com/v1/public/yql?q=select+%2A+from+html+where+url%3D%22https%3A%2F%2Ftelaris.wlu.ca%2Fssb_prod%2Fbwckschd.p_disp_dyn_sched%22&format=json&diagnostics=true&callback',
@@ -26,6 +43,136 @@ coursePlanner.semesterControl = {
                 }
             }
             $("select").selectmenu('refresh');
+            $.mobile.loading( 'hide');
+        });
+    },
+    getCourses:function(term_in) {
+        var courseCodes = [['AN','AB','AR'],['AF','AS','BH','BI'],
+                        ['BF','BU','MB'],['CH','CO','GC','CL'],
+                        ['CS','CP','CC'],['CQ','KS','EL','EC'],
+                        ['EU','EM','EN'],['ES','FS','FR','GG'],
+                        ['GL','GM','GV'],['GS','GR','HE','HS'],
+                        ['HI','HP','HN'],['HR','ID','UU','IP'],
+                        ['IT','JN','KP'],['LL','LA','LY','MF'],
+                        ['MS','MA','MX'],['ML','MI','MU','MZ'],
+                        ['NE','ED','NO'],['OL','PP','PC','PO'],
+                        ['PS','RE','SC'],['SJ','SE','SL','SK'],
+                        ['CT','SY','SP'],['TH','36','AP','04'],
+                        ['CX','05','MW'],['PM','20','WS','YC']];
+
+        for (var i = 0; i < courseCodes.length; i++) {
+            this.makeCourseRequest(term_in, courseCodes[i]);
+        }
+    },
+    makeCourseRequest:function(term_in,courseCode) {
+        var theUrl = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20htmlpost%20where%20url%3D'https%3A%2F%2Ftelaris.wlu.ca%2Fssb_prod%2Fbwckschd.p_get_crse_unsec'%20and%20postdata%3D'term_in%3D" + term_in + "%26sel_subj%3Ddummy%26sel_day%3Ddummy%26sel_schd%3Ddummy%26sel_insm%3Ddummy%26sel_camp%3Ddummy%26sel_levl%3Ddummy%26sel_sess%3Ddummy%26sel_instr%3Ddummy%26sel_ptrm%3Ddummy%26sel_attr%3Ddummy%26sel_camp%3D%2525";
+        for (var i = 0; i < courseCode.length; i++) {
+            theUrl = theUrl + '%26sel_subj%3D' + courseCode[i];
+        }
+
+        theUrl = theUrl + "%26sel_crse%3D%26sel_title%3D%26sel_levl%3D%2525%26begin_hh%3D00%26begin_mi%3D00%26begin_ap%3Dx%26end_hh%3D00%26end_mi%3D00%26end_ap%3Dx'%20and%20xpath%3D%22%2F%2Fdiv%5B%40class%3D'pagebodydiv'%5D%2F%2Ftable%5B%40class%3D'datadisplaytable'%5D%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
+
+        $.ajax({
+            type:'GET',
+            url: theUrl,
+            dataType:'json'
+        }).done(function( data ) {
+
+            var subject = [];
+
+            if (data["query"]["count"] == 0) {
+                // console.log(term_in);
+                // console.log(courseCode);
+                makeCourseRequest(term_in,courseCode);
+            } else {
+                var tables = data["query"]["results"]["postresult"]["table"];
+
+                for (var i = 0; i < tables.length; i++) {
+                    if ((i % 2 == 0) && (i != tables.length - 1)) {
+
+                        // var course = {};
+                        var course = new coursePlanner.Course();
+
+                        try {
+                            var courseHeader = tables[i]["tr"][0]["th"]["a"]["content"];
+                            var splitCourseHeader = courseHeader.split(" - ");
+                            // course["title"] = splitCourseHeader[0];
+                            course.setCourseTitle(splitCourseHeader[0]);
+                            var code = splitCourseHeader[2];
+                            // course["code"] = code;
+                            // course["subject"] = code.slice(0,2);
+                            // course["section"] = splitCourseHeader[3];
+                            course.setCourseCode(code);
+                            course.setSubject(code.slice(0,2));
+                            course.setSection(splitCourseHeader[3]);
+
+                            // var semester = {};
+                            // semester["year"] = term_in.slice(0,4);
+                            // semester["season"] = coursePlanner.utilities.getSeason(term_in.slice(4));
+                            // course["semester"] = semester;
+                            course.setSemester(new coursePlanner.Semester(coursePlanner.utilities.getSeason(term_in.slice(4)), term_in.slice(0,4)));
+
+                        } catch (error) {
+                            // console.log("first table - error - " + courseCode + " - " + error);
+                        }
+
+                        try {
+                            var courseInfo = tables[i]["tr"][1]["td"]["table"]["tr"][1]["td"];
+                            if ("p" in courseInfo[3]) {
+                                // course["location"] = courseInfo[3]["p"];
+                                course.setLocation(courseInfo[3]["p"]);
+                            } else {
+                                // course["location"] = "TBA";
+                                course.setLocation("TBA");
+                            }
+
+                            if ("p" in courseInfo[6]) {
+                                // course["professor"] = courseInfo[6]["p"]["content"].replace(" (","").replace(")","");//["target"];
+                                course.setProfessor(courseInfo[6]["p"]["content"].replace(" (","").replace(")",""));
+                            } else {
+                                // course["professor"] = "TBA";
+                                course.setProfessor("TBA");
+                            }
+
+                            var times = courseInfo[1]["p"];
+                            var days = courseInfo[2]["p"];
+
+                            course["timeslots"] = [];
+
+                            var hasTimes = (typeof(times) === 'string');
+
+                            if (hasTimes) {
+                                var timesArray = times.split(" - ");
+                                var daysArray = days.split("");
+                                for (var j = 0; j < daysArray.length; j++) {
+                                    course.addTimeslot(new coursePlanner.Timeslot(coursePlanner.utilities.getDay(daysArray[j]),coursePlanner.utilities.getTime(timesArray[0]),coursePlanner.utilities.getTime(timesArray[1])));
+                                    // course["timeslots"][j] = {
+                                    //     day:daysArray[j],
+                                    //     startTime: timesArray[0],
+                                    //     endTime: timesArray[1]
+                                    // };
+                                }
+                            } else {
+                                // course["timeslots"][0] = {
+                                //   day:"TBA",
+                                //   startTime: "TBA",
+                                //   endTime: "TBA"
+                                // };
+                                // course.addTimeslot(new coursePlanner.Timeslot("TBA","TBA","TBA"));
+                            }
+                        } catch (error) {
+                            // console.log("second table - error - " + courseCode + " - " + error);
+                        }
+
+                        var semester = coursePlanner.currentSemester.get();
+                        semester.addCourse(course);
+                        coursePlanner.currentSemester.set(semester);
+                        $('.course_list').listview("refresh");
+                        $('.schedule_list').listview("refresh");
+                        // console.log(course);
+                    }
+                }
+            }
         });
     },
     loadFakeCourses: function() {
@@ -111,7 +258,6 @@ coursePlanner.semesterControl = {
         coursePlanner.currentSemester.set(semester);
     },
     initialize: function() {
-        alert('bananana');
         this.getSemesters();
     }
 };
