@@ -12,20 +12,10 @@ coursePlanner.semesterControl = {
         coursePlanner.currentSemester.set(new coursePlanner.Semester(season, year));
         this.getCourses(chosenTerm);
 
-        $.mobile.loading( 'show', {
-            text: 'Loading Courses',
-            textVisible: true,
-            html: ""
-        });
         // coursePlanner.currentSemester.set(new coursePlanner.Semester(coursePlanner.TERMS.Fall, "2014"));
         // this.loadFakeCourses();
     },
     getSemesters:function() {
-        $.mobile.loading( 'show', {
-            text: 'Loading Semesters',
-            textVisible: true,
-            html: ""
-        });
         $.ajax({
             type:'GET',
             url: 'https://query.yahooapis.com/v1/public/yql?q=select+%2A+from+html+where+url%3D%22https%3A%2F%2Ftelaris.wlu.ca%2Fssb_prod%2Fbwckschd.p_disp_dyn_sched%22&format=json&diagnostics=true&callback',
@@ -43,7 +33,6 @@ coursePlanner.semesterControl = {
                 }
             }
             $("select").selectmenu('refresh');
-            $.mobile.loading( 'hide');
         });
     },
     getCourses:function(term_in) {
