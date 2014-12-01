@@ -5,13 +5,13 @@ coursePlanner.semesterControl = {
     //Initialize new semester
     setSemester: function() {
         var chosenTerm = $("#semesters").val();
-        alert(chosenTerm);
         var year = chosenTerm.slice(0,4);
         var season = coursePlanner.utilities.getSeason(chosenTerm.slice(4));
 
         coursePlanner.currentSemester.set(new coursePlanner.Semester(season, year));
         this.getCourses(chosenTerm);
 
+        coursePlanner.scheduleControl.setTitle();
         // coursePlanner.currentSemester.set(new coursePlanner.Semester(coursePlanner.TERMS.Fall, "2014"));
         // this.loadFakeCourses();
     },
