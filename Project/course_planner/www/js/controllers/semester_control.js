@@ -10,13 +10,18 @@ coursePlanner.semesterControl = {
 
         coursePlanner.currentSemester.set(new coursePlanner.Semester(season, year));
         $(document).ajaxStart(function() {
-            // show a loader or something here so it looks like the page is doing something.
+
+            $.mobile.loading( "show" );
+
         });
         this.getCourses(chosenTerm);
 
         coursePlanner.scheduleControl.setTitle();
 
         $(document).ajaxStop(function() {
+
+            $.mobile.loading( "hide" );
+
             $.mobile.pageContainer.pagecontainer("change", "index.html#schedule");
             $('.course_list').listview("refresh");
             $('.schedule_list').listview("refresh");
@@ -40,6 +45,8 @@ coursePlanner.semesterControl = {
                     $("#semesters").append(newOption);
                 }
             }
+
+            $("#semesters").selectmenu("refresh");
         });
     },
     getCourses:function(term_in) {
