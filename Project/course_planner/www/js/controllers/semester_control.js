@@ -67,11 +67,7 @@ coursePlanner.semesterControl = {
             dataType:'json'
         }).done(function( data ) {
 
-            var subject = [];
-
             if (data["query"]["count"] == 0) {
-                // console.log(term_in);
-                // console.log(courseCode);
                 makeCourseRequest(term_in,courseCode);
             } else {
                 var tables = data["query"]["results"]["postresult"]["table"];
@@ -79,26 +75,16 @@ coursePlanner.semesterControl = {
                 for (var i = 0; i < tables.length; i++) {
                     if ((i % 2 == 0) && (i != tables.length - 1)) {
 
-                        // var course = {};
                         var course = new coursePlanner.Course();
 
                         try {
                             var courseHeader = tables[i]["tr"][0]["th"]["a"]["content"];
                             var splitCourseHeader = courseHeader.split(" - ");
-                            // course["title"] = splitCourseHeader[0];
                             course.setCourseTitle(splitCourseHeader[0]);
                             var code = splitCourseHeader[2];
-                            // course["code"] = code;
-                            // course["subject"] = code.slice(0,2);
-                            // course["section"] = splitCourseHeader[3];
                             course.setCourseCode(code);
                             course.setSubject(code.slice(0,2));
                             course.setSection(splitCourseHeader[3]);
-
-                            // var semester = {};
-                            // semester["year"] = term_in.slice(0,4);
-                            // semester["season"] = coursePlanner.utilities.getSeason(term_in.slice(4));
-                            // course["semester"] = semester;
                             course.setSemester(new coursePlanner.Semester(coursePlanner.utilities.getSeason(term_in.slice(4)), term_in.slice(0,4)));
 
                         } catch (error) {
@@ -108,25 +94,19 @@ coursePlanner.semesterControl = {
                         try {
                             var courseInfo = tables[i]["tr"][1]["td"]["table"]["tr"][1]["td"];
                             if ("p" in courseInfo[3]) {
-                                // course["location"] = courseInfo[3]["p"];
                                 course.setLocation(courseInfo[3]["p"]);
                             } else {
-                                // course["location"] = "TBA";
                                 course.setLocation("TBA");
                             }
 
                             if ("p" in courseInfo[6]) {
-                                // course["professor"] = courseInfo[6]["p"]["content"].replace(" (","").replace(")","");//["target"];
                                 course.setProfessor(courseInfo[6]["p"]["content"].replace(" (","").replace(")",""));
                             } else {
-                                // course["professor"] = "TBA";
                                 course.setProfessor("TBA");
                             }
 
                             var times = courseInfo[1]["p"];
                             var days = courseInfo[2]["p"];
-
-                            course["timeslots"] = [];
 
                             var hasTimes = (typeof(times) === 'string');
 
@@ -135,19 +115,9 @@ coursePlanner.semesterControl = {
                                 var daysArray = days.split("");
                                 for (var j = 0; j < daysArray.length; j++) {
                                     course.addTimeslot(new coursePlanner.Timeslot(coursePlanner.utilities.getDay(daysArray[j]),coursePlanner.utilities.getTime(timesArray[0]),coursePlanner.utilities.getTime(timesArray[1])));
-                                    // course["timeslots"][j] = {
-                                    //     day:daysArray[j],
-                                    //     startTime: timesArray[0],
-                                    //     endTime: timesArray[1]
-                                    // };
                                 }
                             } else {
-                                // course["timeslots"][0] = {
-                                //   day:"TBA",
-                                //   startTime: "TBA",
-                                //   endTime: "TBA"
-                                // };
-                                // course.addTimeslot(new coursePlanner.Timeslot("TBA","TBA","TBA"));
+
                             }
                         } catch (error) {
                             // console.log("second table - error - " + courseCode + " - " + error);
@@ -156,96 +126,96 @@ coursePlanner.semesterControl = {
                         var semester = coursePlanner.currentSemester.get();
                         semester.addCourse(course);
                         coursePlanner.currentSemester.set(semester);
-                        $('.course_list').listview("refresh");
-                        $('.schedule_list').listview("refresh");
-                        // console.log(course);
+                        if (i > tables.length - 3) {
+                            coursePlanner.scheduleControl.initialize();
+                        }
                     }
                 }
             }
         });
     },
-    loadFakeCourses: function() {
-        var CP317 = new coursePlanner.Course()
-            .setCourseCode("CP317")
-            .setCourseTitle("Software Engineering")
-            .setSubject("CP")
-            .setSection("A")
-            .setSemester(new coursePlanner.Semester("Fall", "2014"))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Monday, '11:30', '13:00'))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Wednesday, '13:30', '15:00'))
-            .setDescription("A class to take")
-            .setLocation("address goes here?")
-            .setProfessor("Albus Dumbledore");
+    // loadFakeCourses: function() {
+    //     var CP317 = new coursePlanner.Course()
+    //         .setCourseCode("CP317")
+    //         .setCourseTitle("Software Engineering")
+    //         .setSubject("CP")
+    //         .setSection("A")
+    //         .setSemester(new coursePlanner.Semester("Fall", "2014"))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Monday, '11:30', '13:00'))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Wednesday, '13:30', '15:00'))
+    //         .setDescription("A class to take")
+    //         .setLocation("address goes here?")
+    //         .setProfessor("Albus Dumbledore");
 
-        var CP213 = new coursePlanner.Course()
-            .setCourseCode("CP213")
-            .setCourseTitle("Another SWE Course")
-            .setSubject("CP")
-            .setSection("A")
-            .setSemester(new coursePlanner.Semester("Fall", "2014"))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Monday, '8:30', '9:30'))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Wednesday, '8:30', '9:30'))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Friday, '8:30', '9:30'))
-            .setDescription("A course about SWE")
-            .setLocation("address goes here?")
-            .setProfessor("Albus Dumbledore");
+    //     var CP213 = new coursePlanner.Course()
+    //         .setCourseCode("CP213")
+    //         .setCourseTitle("Another SWE Course")
+    //         .setSubject("CP")
+    //         .setSection("A")
+    //         .setSemester(new coursePlanner.Semester("Fall", "2014"))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Monday, '8:30', '9:30'))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Wednesday, '8:30', '9:30'))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Friday, '8:30', '9:30'))
+    //         .setDescription("A course about SWE")
+    //         .setLocation("address goes here?")
+    //         .setProfessor("Albus Dumbledore");
 
-        var AC213 = new coursePlanner.Course()
-            .setCourseCode("AC213")
-            .setCourseTitle("Other Subject")
-            .setSubject("AC")
-            .setSection("A")
-            .setSemester(new coursePlanner.Semester("Fall", "2014"))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Tuesday, '16:00', '17:30'))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Thursday, '16:00', '17:30'))
-            .setDescription("An AC course")
-            .setLocation("address goes here?")
-            .setProfessor("Albus Dumbledore");
+    //     var AC213 = new coursePlanner.Course()
+    //         .setCourseCode("AC213")
+    //         .setCourseTitle("Other Subject")
+    //         .setSubject("AC")
+    //         .setSection("A")
+    //         .setSemester(new coursePlanner.Semester("Fall", "2014"))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Tuesday, '16:00', '17:30'))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Thursday, '16:00', '17:30'))
+    //         .setDescription("An AC course")
+    //         .setLocation("address goes here?")
+    //         .setProfessor("Albus Dumbledore");
 
-        var CM102 = new coursePlanner.Course()
-            .setCourseCode("CM401")
-            .setCourseTitle("Interpersonal Communications")
-            .setSubject("CM")
-            .setSection("B")
-            .setSemester(new coursePlanner.Semester("Fall", "2014"))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Tuesday, '16:00', '17:30'))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Thursday, '12:00', '13:30'))
-            .setDescription("A course about interpersonal communications for the business context. This course conflicts with AC213 and CM412")
-            .setLocation("address goes here?")
-            .setProfessor("Fred Flintstone");
+    //     var CM102 = new coursePlanner.Course()
+    //         .setCourseCode("CM401")
+    //         .setCourseTitle("Interpersonal Communications")
+    //         .setSubject("CM")
+    //         .setSection("B")
+    //         .setSemester(new coursePlanner.Semester("Fall", "2014"))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Tuesday, '16:00', '17:30'))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Thursday, '12:00', '13:30'))
+    //         .setDescription("A course about interpersonal communications for the business context. This course conflicts with AC213 and CM412")
+    //         .setLocation("address goes here?")
+    //         .setProfessor("Fred Flintstone");
 
-        var CM412 = new coursePlanner.Course()
-            .setCourseCode("CM412")
-            .setCourseTitle("Advertising and Culture")
-            .setSubject("CM")
-            .setSection("A")
-            .setSemester(new coursePlanner.Semester("Fall", "2014"))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Tuesday, '16:30', '18:00'))
-            .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Thursday, '12:00', '17:30'))
-            .setDescription("A course about interpersonal communications for the business context. This course conflicts with AC213 and CM102")
-            .setLocation("address goes here?")
-            .setProfessor("Fred Flintstone");
+    //     var CM412 = new coursePlanner.Course()
+    //         .setCourseCode("CM412")
+    //         .setCourseTitle("Advertising and Culture")
+    //         .setSubject("CM")
+    //         .setSection("A")
+    //         .setSemester(new coursePlanner.Semester("Fall", "2014"))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Tuesday, '16:30', '18:00'))
+    //         .addTimeslot(new coursePlanner.Timeslot(coursePlanner.DAYS.Thursday, '12:00', '17:30'))
+    //         .setDescription("A course about interpersonal communications for the business context. This course conflicts with AC213 and CM102")
+    //         .setLocation("address goes here?")
+    //         .setProfessor("Fred Flintstone");
 
 
-        var emptyCourse = new coursePlanner.Course()
-            .setCourseCode("EM400")
-            .setCourseTitle("Empty Course")
-            .setSubject("EM")
-            .setSection("A")
-            .setSemester(new coursePlanner.Semester("Fall", "2014"))
-            .setDescription("A test empty course without timeslots and a TBA location/professor")
-            .setLocation("TBA")
-            .setProfessor("TBA");
+    //     var emptyCourse = new coursePlanner.Course()
+    //         .setCourseCode("EM400")
+    //         .setCourseTitle("Empty Course")
+    //         .setSubject("EM")
+    //         .setSection("A")
+    //         .setSemester(new coursePlanner.Semester("Fall", "2014"))
+    //         .setDescription("A test empty course without timeslots and a TBA location/professor")
+    //         .setLocation("TBA")
+    //         .setProfessor("TBA");
 
-        var semester = coursePlanner.currentSemester.get();
-        semester.addCourse(CP317)
-            .addCourse(CP213)
-            .addCourse(AC213)
-            .addCourse(CM102)
-            .addCourse(CM412)
-            .addCourse(emptyCourse);
-        coursePlanner.currentSemester.set(semester);
-    },
+    //     var semester = coursePlanner.currentSemester.get();
+    //     semester.addCourse(CP317)
+    //         .addCourse(CP213)
+    //         .addCourse(AC213)
+    //         .addCourse(CM102)
+    //         .addCourse(CM412)
+    //         .addCourse(emptyCourse);
+    //     coursePlanner.currentSemester.set(semester);
+    // },
     initialize: function() {
         this.getSemesters();
     }
