@@ -76,7 +76,6 @@ coursePlanner.scheduleControl = {
 
         $('#' + listId).append(listItem);
         $('#' + linkId).click(function() {
-            alert('banana');
             action();
         });
     },

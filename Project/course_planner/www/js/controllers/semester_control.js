@@ -21,8 +21,7 @@ coursePlanner.semesterControl = {
             $('.course_list').listview("refresh");
             $('.schedule_list').listview("refresh");
         });
-        // coursePlanner.currentSemester.set(new coursePlanner.Semester(coursePlanner.TERMS.Fall, "2014"));
-        // this.loadFakeCourses();
+
     },
     getSemesters:function() {
         $.ajax({
@@ -41,7 +40,6 @@ coursePlanner.semesterControl = {
                     $("#semesters").append(newOption);
                 }
             }
-          //  $("select").selectmenu('refresh');
         });
     },
     getCourses:function(term_in) {
