@@ -38,15 +38,15 @@ coursePlanner.semesterControl = {
     getCourses:function(term_in) {
         var courseCodes = [['AN','AB','AR'],['AF','AS','BH','BI'],
                         ['BF','BU','MB'],['CH','CO','GC','CL'],
-                        ['CS','CP','CC'],['CQ','KS','EL','EC'],
-                        ['EU','EM','EN'],['ES','FS','FR','GG'],
+                        ['CS','CP','CC','CQ'],['KS','DH','EL','EC'],
+                        ['EU','EM','EN','ES'],['FS','FI','FR','GG'],
                         ['GL','GM','GV'],['GS','GR','HE','HS'],
                         ['HI','HP','HN'],['HR','ID','UU','IP'],
                         ['IT','JN','KP'],['LL','LA','LY','MF'],
                         ['MS','MA','MX'],['ML','MI','MU','MZ'],
                         ['NE','ED','NO'],['OL','PP','PC','PO'],
                         ['PS','RE','SC'],['SJ','SE','SL','SK'],
-                        ['CT','SY','SP'],['TH','36','AP','04'],
+                        ['CT','SY','SP','TM'],['TH','36','AP','04'],
                         ['CX','05','MW'],['PM','20','WS','YC']];
 
         for (var i = 0; i < courseCodes.length; i++) {
