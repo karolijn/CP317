@@ -8,19 +8,10 @@ coursePlanner.scheduleControl = {
                 $('#course_list').listview().filterable('option', 'filterCallback', this.filterCourseList);
             }
         });
-		$('#subjects').change(function() {
-			var code = $('#subjects').val();
-			$('#course_list').listview().filterable('option', 'filterCallback', this.filterCourseList);
-		});
     },
     filterCourseList: function(index, filter) {
-        if (filter.indexOf("subject: ") == 0) {
-			var searchText = $('#course_list').children()[index].textContent.substring(0,3);
-			return searchText.indexOf(filter) === -1;
-        } else {
-            var searchText = $('#course_list').children()[index].textContent;
-            return searchText.toLowerCase().indexOf( filter ) === -1;
-        }
+        var searchText = $('#course_list').children()[index].textContent;
+        return searchText.toLowerCase().indexOf( filter ) === -1;
     },
     addCourseToSchedule: function(courseKey) {
       var schedule = coursePlanner.utilities.getScheduleForCurrentSemester();
