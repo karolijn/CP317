@@ -25,10 +25,12 @@ coursePlanner.semesterControl = {
             $.mobile.pageContainer.pagecontainer("change", "index.html#schedule");
             $('.course_list').listview("refresh");
             $('.schedule_list').listview("refresh");
+
         });
 
     },
     getSemesters:function() {
+        $("#loadSemestersError").hide();
         $.ajax({
             type:'GET',
             url: 'https://query.yahooapis.com/v1/public/yql?q=select+%2A+from+html+where+url%3D%22https%3A%2F%2Ftelaris.wlu.ca%2Fssb_prod%2Fbwckschd.p_disp_dyn_sched%22&format=json&diagnostics=true&callback',
@@ -47,9 +49,13 @@ coursePlanner.semesterControl = {
             }
 
             $("#semesters").selectmenu("refresh");
+            $('#goToSchedulesPageBtn').show();
+        }).fail(function() {
+            $("#loadSemestersError").show();
         });
     },
     getCourses:function(term_in) {
+        $("#loadCoursesError").hide();
         var courseCodes = [['AN','AB','AR'],['AF','AS','BH','BI'],
                         ['BF','BU','MB'],['CH','CO','GC','CL'],
                         ['CS','CP','CC','CQ'],['KS','DH','EL','EC'],
@@ -72,9 +78,7 @@ coursePlanner.semesterControl = {
         for (var i = 0; i < courseCode.length; i++) {
             theUrl = theUrl + '%26sel_subj%3D' + courseCode[i];
         }
-
         theUrl = theUrl + "%26sel_crse%3D%26sel_title%3D%26sel_levl%3D%2525%26begin_hh%3D00%26begin_mi%3D00%26begin_ap%3Dx%26end_hh%3D00%26end_mi%3D00%26end_ap%3Dx'%20and%20xpath%3D%22%2F%2Fdiv%5B%40class%3D'pagebodydiv'%5D%2F%2Ftable%5B%40class%3D'datadisplaytable'%5D%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
-
         $.ajax({
             type:'GET',
             url: theUrl,
@@ -100,9 +104,8 @@ coursePlanner.semesterControl = {
                             course.setSubject(code.slice(0,2));
                             course.setSection(splitCourseHeader[3]);
                             course.setSemester(new coursePlanner.Semester(coursePlanner.utilities.getSeason(term_in.slice(4)), term_in.slice(0,4)));
-
                         } catch (error) {
-                            // console.log("first table - error - " + courseCode + " - " + error);
+
                         }
 
                         try {
@@ -134,7 +137,7 @@ coursePlanner.semesterControl = {
 
                             }
                         } catch (error) {
-                            // console.log("second table - error - " + courseCode + " - " + error);
+
                         }
 
                         var semester = coursePlanner.currentSemester.get();
@@ -143,6 +146,8 @@ coursePlanner.semesterControl = {
                     }
                 }
             }
+        }).fail(function() {
+           $("#loadCoursesError").show();
         });
     },
     // loadFakeCourses: function() {
