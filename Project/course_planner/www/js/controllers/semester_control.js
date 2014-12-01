@@ -10,8 +10,7 @@ coursePlanner.semesterControl = {
 
         coursePlanner.currentSemester.set(new coursePlanner.Semester(season, year));
         this.getCourses(chosenTerm);
-
-        coursePlanner.scheduleControl.setTitle();
+        // coursePlanner.scheduleControl.setTitle();
         // coursePlanner.currentSemester.set(new coursePlanner.Semester(coursePlanner.TERMS.Fall, "2014"));
         // this.loadFakeCourses();
     },
@@ -32,7 +31,7 @@ coursePlanner.semesterControl = {
                     $("#semesters").append(newOption);
                 }
             }
-            $("select").selectmenu('refresh');
+            $("#semesters").selectmenu('refresh');
         });
     },
     getCourses:function(term_in) {
