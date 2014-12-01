@@ -43,9 +43,9 @@
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/entities \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/enums.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/index.js \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/index_new.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/utilities.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/controllers/course_details_control.js \
+/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/controllers/export_to_ical_control.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/controllers/schedule_control.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/controllers/semester_control.js \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/js/entities/course.js \

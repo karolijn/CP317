@@ -43,22 +43,24 @@ coursePlanner.Schedule = function() {
     }
 
     // Add [course] to the current schedule.
+    // Throws: ScheduleConflictError, UnscheduledCourseError
     this.addCourse = function(course) {
         try {
           addCourseToTimetable(course);
           courses[course.getKey()] = course;
         } catch(e) {
           removeCourseFromTimetable(course);
-          throw "Error adding course: " + e;
+          throw e;
         }
         return this;
     };
 
     // Private method to add the course to a timetable. This is used for
     // collision detection.
+    // Throws: ScheduleConflictError, UnscheduledCourseError
     var addCourseToTimetable = function(course) {
         if (course.getTimeslots().length < 1) {
-            alert(course.getCourseCode() + "'s timeslots are TBD. It will be added to the course list but cannot be scheduled.")
+            throw new coursePlanner.errors.UnscheduledCourseError(course.getCourseCode() + "'s timeslots are TBD and cannot be scheduled.");
         }
         for (var i = 0; i < course.getTimeslots().length; ++i) {
           var courseTimeslot = course.getTimeslots()[i];
@@ -94,9 +96,9 @@ coursePlanner.Schedule = function() {
             // If the first timetable after the course start is also after the end,
             // check that something isn't ending that was alreay in progress.
             if (timestamp < courseEndTime || daySchedule[j].isEnd()) {
-              throw course.getCourseCode() + " conflicts with "
+              throw new coursePlanner.errors.ScheduleConflictError(course.getCourseCode() + " conflicts with "
                 + coursePlanner.currentSemester.get().getCourse((daySchedule[j].getCourseKey())).getCourseCode()
-                + ". You can only schedule one of these courses."
+                + ". You can only schedule one of these courses.");
             }
 
             //If there is no conflict, add the course before the event that follows it.

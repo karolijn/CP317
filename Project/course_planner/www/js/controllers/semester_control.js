@@ -9,9 +9,18 @@ coursePlanner.semesterControl = {
         var season = coursePlanner.utilities.getSeason(chosenTerm.slice(4));
 
         coursePlanner.currentSemester.set(new coursePlanner.Semester(season, year));
+        $(document).ajaxStart(function() {
+            // show a loader or something here so it looks like the page is doing something.
+        });
         this.getCourses(chosenTerm);
 
         coursePlanner.scheduleControl.setTitle();
+
+        $(document).ajaxStop(function() {
+            $.mobile.pageContainer.pagecontainer("change", "index.html#schedule");
+            $('.course_list').listview("refresh");
+            $('.schedule_list').listview("refresh");
+        });
         // coursePlanner.currentSemester.set(new coursePlanner.Semester(coursePlanner.TERMS.Fall, "2014"));
         // this.loadFakeCourses();
     },
@@ -32,7 +41,7 @@ coursePlanner.semesterControl = {
                     $("#semesters").append(newOption);
                 }
             }
-            $("select").selectmenu('refresh');
+          //  $("select").selectmenu('refresh');
         });
     },
     getCourses:function(term_in) {
@@ -68,7 +77,7 @@ coursePlanner.semesterControl = {
         }).done(function( data ) {
 
             if (data["query"]["count"] == 0) {
-                makeCourseRequest(term_in,courseCode);
+               coursePlanner.semesterControl.makeCourseRequest(term_in,courseCode);
             } else {
                 var tables = data["query"]["results"]["postresult"]["table"];
 
@@ -126,9 +135,6 @@ coursePlanner.semesterControl = {
                         var semester = coursePlanner.currentSemester.get();
                         semester.addCourse(course);
                         coursePlanner.currentSemester.set(semester);
-                        if (i > tables.length - 3) {
-                            coursePlanner.scheduleControl.initialize();
-                        }
                     }
                 }
             }

@@ -6,14 +6,12 @@ coursePlanner = {}
 coursePlanner.initialize = function() {
     //Fill Select Semesters Dropdown menu
     $('#home').on('pagebeforecreate', function() {
-        alert('banana');
         coursePlanner.semesterControl.initialize();
     });
 
     // Initialize and size the schedule calendar on the schedule page.
     $('#schedule').on('pagebeforecreate', function() {
-        coursePlanner.scheduleControl.initialize();
-
+            coursePlanner.scheduleControl.initialize();
         $('#schedule_calendar').css({
             height: $(window).height() * 0.5
         });

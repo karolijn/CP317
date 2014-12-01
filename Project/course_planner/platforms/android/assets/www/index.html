@@ -12,7 +12,19 @@
 
 	<script type="text/javascript" src="lib/jquery-mobile/js/jquery-1.11.1.js"></script>
 	<script type="text/javascript" src="lib/jquery-mobile/js/jquery.mobile-1.4.5.js"></script>
-	<script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src='js/utilities.js'></script>
+    <script type="text/javascript" src='js/enums.js'></script>
+    <script type="text/javascript" src='js/entities/timeslot.js'></script>
+    <script type="text/javascript" src='js/entities/course.js'></script>
+    <script type="text/javascript" src='js/entities/errors.js'></script>
+    <script type="text/javascript" src='js/entities/schedule.js'></script>
+    <script type="text/javascript" src='js/entities/semester.js'></script>
+    <script type="text/javascript" src='js/controllers/course_details_control.js'></script>
+    <script type="text/javascript" src='js/controllers/schedule_control.js'></script>
+    <script type="text/javascript" src='js/controllers/semester_control.js'></script>
+    <script type="text/javascript" src='js/controllers/export_to_ical_control.js'></script>
+
 </head>
 
 <body>
@@ -22,14 +34,23 @@
 	</div>
 
 	<div role="main" class="ui-content" id="home-content">
-		<h2>This is where the select semester stuff goes.</h2>
-		<p><a href="#schedule" onclick="coursePlanner.semesterControl.setSemester();">Go</a></p>
+        <form>
+  			<fieldset class="ui-field-contain">
+    			<label for="semesters">Select Semester</label>
+    			<select name="semester" id="semesters">
+    			</select>
+  			</fieldset>
+		</form>
+
+		<p>
+            <a href="#" onclick="coursePlanner.semesterControl.setSemester();">Go</a>
+        </p>
 	</div>
 </div>
 
 <div data-role="page" id="schedule">
 	<div data-theme="a" data-role="header" data-position="fixed">
-		<h1 class="semester_title">Schedule Page</h1><a href="#home" data-transition="slide" data-direction="reverse" data-icon="arrow-l" class="ui-btn-left">Home</a>
+		<h1 class="semester_title">Schedule Page</h1><a href="#home" data-transition="slide" data-direction="reverse" data-icon="arrow-l" class="ui-btn-left">Home</a><a href="#export" onclick="coursePlanner.exportToiCalControl.exportCalendar();" data-icon="calendar" class="ui-btn-right">Export</a>
 	</div>
 
 	<div data-role="content" class="ui-content">
@@ -46,6 +67,94 @@
             <form class="ui-filterable">
                  <input id="course_name_filter" data-type="search" placeholder="search for course">
             </form>
+			<select id="subjects" data-filter="false" data-input="#course_name_filter">
+				<option value="AN">Anthropology</option>
+				<option value="AB">Arabic</option>
+				<option value="AR">Archaeology</option>
+				<option value="AF">Arts Topic Seminar</option>
+				<option value="AS">Astronomy</option>
+				<option value="BH">Biological & Chemical Sciences</option>
+				<option value="BI">Biology</option>
+				<option value="BF">Brantford Foundations</option>
+				<option value="BU">Business</option>
+				<option value="MB">Business Technology Management</option>
+				<option value="CH">Chemistry</option>
+				<option value="CO">Childhood Education</option>
+				<option value="GC">Christian/Global Citizenship</option>
+				<option value="CL">Classics</option>
+				<option value="CS">Communication Studies</option>
+				<option value="CP">Computer Science</option>
+				<option value="CC">Criminology</option>
+				<option value="CQ">Cultural Analysis</option>
+				<option value="KS">Cultural Studies</option>
+				<option value="DH">Digital Humanities</option>
+				<option value="EL">ESL - English</option>
+				<option value="EC">Economics</option>
+				<option value="EU">Education</option>
+				<option value="EM">Education Minor</option>
+				<option value="EN">English</option>
+				<option value="ES">Environmental Studies</option>
+				<option value="FS">Film Studies</option>
+				<option value="FI">Fine Arts</option>
+				<option value="FR">French</option>
+				<option value="GG">Geography</option>
+				<option value="GL">Geology</option>
+				<option value="GM">German</option>
+				<option value="GV">Global Governance</option>
+				<option value="GS">Global Studies</option>
+				<option value="GR">Greek</option>
+				<option value="HE">Health Science</option>
+				<option value="HS">Health Studies</option>
+				<option value="HI">History</option>
+				<option value="HP">History & Philosophy of Science</option>
+				<option value="HN">Human Biology</option>
+				<option value="HR">Human Rights & Human Diversity</option>
+				<option value="ID">Indigenous Studies</option>
+				<option value="UU">Interdisciplinary Studies</option>
+				<option value="IP">International Public Policy</option>
+				<option value="IT">Italian</option>
+				<option value="JN">Journalism</option>
+				<option value="KP">Kinesiology & Physical Ed</option>
+				<option value="LL">Language and Literature</option>
+				<option value="LA">Latin</option>
+				<option value="LY">Law & Society</option>
+				<option value="MF">Master Finance</option>
+				<option value="MS">Master Science</option>
+				<option value="MA">Mathematics</option>
+				<option value="MX">Media Studies</option>
+				<option value="ML">Medieval Studies</option>
+				<option value="MI">Mediterranean Studies</option>
+				<option value="MU">Music</option>
+				<option value="MZ">Muslim Studies</option>
+				<option value="NE">Near Eastern Studies</option>
+				<option value="ED">Nipissing Ed</option>
+				<option value="NO">North American Studies</option>
+				<option value="OL">Organizational Leadership</option>
+				<option value="PP">Philosophy</option>
+				<option value="PC">Physics</option>
+				<option value="PO">Political Science</option>
+				<option value="PS">Psychology</option>
+				<option value="RE">Religion & Culture</option>
+				<option value="SC">Science</option>
+				<option value="SJ">Social Justice</option>
+				<option value="SE">Social Entrepreneurship</option>
+				<option value="SL">Social Welfare</option>
+				<option value="SK">Social Work</option>
+				<option value="CT">Society, Cul & Env</option>
+				<option value="SY">Sociology</option>
+				<option value="SP">Spanish</option>
+				<option value="TH">Theology</option>
+				<option value="36">UW - Actuarial SCience</option>
+				<option value="AP">UW - Applied Mathematics</option>
+				<option value="04">UW - Combinatorics & Opt</option>
+				<option value="CX">UW - Computational Mathematics</option>
+				<option value="05">UW - Computer Science</option>
+				<option value="MW">UW - Mathematical Business</option>
+				<option value="PM">UW - Pure Mathematics</option>
+				<option value="20">UW - Statistics</option>
+				<option value="WS">Women's Studies</option>
+				<option value="YC">Youth and Children Studies</option>
+			</select>
             <ul id="course_list" data-role="listview" data-role="collapsible" data-inset="true" data-theme="b" class="course_list" data-filter="true"
             data-input="#course_name_filter">
             </ul>

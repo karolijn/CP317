@@ -42,7 +42,7 @@ coursePlanner.Course = function() {
     };
     this.getKey = function() {
         if (semester != null) {
-            return semester.getKey() + courseCode;
+            return (semester.getKey() + courseCode).replace(/\s+/g, '');
         }
         return null;
     };

@@ -1,4 +1,3 @@
-
 /*
  * Controller object that controls the current schedule page and data.
  */
@@ -12,7 +11,8 @@ coursePlanner.scheduleControl = {
     },
     filterCourseList: function(index, filter) {
         if (filter.indexOf("subject: ") == 0) {
-                        //search by subject
+			var searchText = $('#course_list').children()[index].textContent;
+			return searchText.toLowerCase().indexOf($('#subjects').find(':selected').value()) === -1;
         } else {
             var searchText = $('#course_list').children()[index].textContent;
             return searchText.toLowerCase().indexOf( filter ) === -1;
@@ -30,7 +30,7 @@ coursePlanner.scheduleControl = {
           $('.course_list').listview("refresh");
           $('.schedule_list').listview("refresh");
       } catch (e) {
-        alert(e);
+        alert(e.message);
       }
     },
     removeCourseFromSchedule: function(courseKey) {
@@ -270,7 +270,7 @@ coursePlanner.scheduleControl = {
 
     },
     setTitle: function() {
-        $('h1.semester_title').text(coursePlanner.currentSemester.toString());
+        $('h1.semester_title').text(coursePlanner.currentSemester.get().toString());
     },
     initialize: function() {
         this.setTitle();
