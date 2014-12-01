@@ -162,7 +162,7 @@ coursePlanner.scheduleControl = {
 
         $('.course_info_link').click(function(event) {
             var courseKey = event.currentTarget.attributes['course_key'].value;
-            coursePlanner.viewCourseDetailsControl.setCourse(courseKey);
+            coursePlanner.courseDetailsControl.setCourse(courseKey);
         });
 
         $('.remove_from_schedule_link').click(function(event) {
