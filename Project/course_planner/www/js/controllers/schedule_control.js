@@ -11,7 +11,8 @@ coursePlanner.scheduleControl = {
     },
     filterCourseList: function(index, filter) {
         if (filter.indexOf("subject: ") == 0) {
-                        //search by subject
+			var searchText = $('#course_list').children()[index].textContent;
+			return searchText.toLowerCase().indexOf($('#subjects').find(':selected').value()) === -1;
         } else {
             var searchText = $('#course_list').children()[index].textContent;
             return searchText.toLowerCase().indexOf( filter ) === -1;
