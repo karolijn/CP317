@@ -20,7 +20,7 @@ coursePlanner.initialize = function() {
     });
 
     $('#schedule').on('pagebeforeshow', function() {
-        $('#course_name_filter').val("");
+        $('#course_name_filter').val("").keyup();
     });
 
     // Resize the calendar on window resize.
