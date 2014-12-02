@@ -1,3 +1,6 @@
+/*
+* Object used to enumerate possible day values.
+*/
 coursePlanner.DAYS = {
     Monday: 0,
     Tuesday: 1,
@@ -8,6 +11,9 @@ coursePlanner.DAYS = {
     Sunday: 6,
 };
 
+/*
+* Object used to enumerate possible season/term values.
+*/
 coursePlanner.TERMS = {
         Winter: 0,
         Fall: 1,

@@ -11,7 +11,8 @@
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/res/drawable-port-ldpi/screen.png \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/res/drawable-port-mdpi/screen.png \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/res/drawable-port-xhdpi/screen.png \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/res/drawable-xhdpi/icon.png \
+/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/res/drawable-xxhdpi/icon.png \
+/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/res/drawable-xxxhdpi/icon.png \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/res/values/strings.xml \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/res/xml/config.xml \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/ant-build/res/drawable/icon.png \
@@ -26,7 +27,8 @@
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/ant-build/res/drawable-port-ldpi/screen.png \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/ant-build/res/drawable-port-mdpi/screen.png \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/ant-build/res/drawable-port-xhdpi/screen.png \
-/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/ant-build/res/drawable-xhdpi/icon.png \
+/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/ant-build/res/drawable-xxhdpi/icon.png \
+/Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/ant-build/res/drawable-xxxhdpi/icon.png \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/_where-is-www.txt \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www \
 /Users/carolyn/Documents/CP317/Project/course_planner/platforms/android/assets/www/cordova.js \

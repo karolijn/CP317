@@ -4,20 +4,25 @@
 coursePlanner.semesterControl = {
     //Initialize new semester
     setSemester: function() {
+        //set chosen semester
         var chosenTerm = $("#semesters").val();
         var year = chosenTerm.slice(0,4);
         var season = coursePlanner.utilities.getSeason(chosenTerm.slice(4));
 
         coursePlanner.currentSemester.set(new coursePlanner.Semester(season, year));
+
+        //show loader on ajax request start
         $(document).ajaxStart(function() {
-
             $.mobile.loading( "show" );
-
         });
+
+        //get available courses for chosen term
         this.getCourses(chosenTerm);
 
+        //set title for schedule page header
         coursePlanner.scheduleControl.setTitle();
 
+        //remove loader, change page, and refresh course lists on ajax request stop
         $(document).ajaxStop(function() {
 
             $.mobile.loading( "hide" );
@@ -29,7 +34,9 @@ coursePlanner.semesterControl = {
         });
 
     },
+    //Make AJAX YQL request to get list of available semesters
     getSemesters:function() {
+        //hide previous semester error message if shown
         $("#loadSemestersError").hide();
         $.ajax({
             type:'GET',
@@ -38,9 +45,11 @@ coursePlanner.semesterControl = {
         }).done(function( data ) {
             var semeseterSelectMenu = data["query"]["results"]["body"]["div"]["3"]["form"]["table"]["tr"]["td"]["select"]["option"];
 
+            //loop through all returned data
             for (var item in semeseterSelectMenu) {
                 var x = semeseterSelectMenu[item];
 
+                //for each item, add option value to the #semesters drop down
                 if (x["value"] != "") {
                     var content = x["content"].split(" ");
                     var newOption = "<option value='" + x["value"]+ "'>" + content[0] + " " + content[1] + "</option>";
@@ -48,14 +57,20 @@ coursePlanner.semesterControl = {
                 }
             }
 
+            //refresh semesters dropdown and show 'GO' button
             $("#semesters").selectmenu("refresh");
             $('#goToSchedulesPageBtn').show();
         }).fail(function() {
+            //show error message and button on ajax request fail
             $("#loadSemestersError").show();
         });
     },
+    //Make AJAX YQL request to get available courses for the given semester
     getCourses:function(term_in) {
+        //hide previous courses error message if shown
         $("#loadCoursesError").hide();
+
+        //list of course codes to use for AJAX url
         var courseCodes = [['AN','AB','AR'],['AF','AS','BH','BI'],
                         ['BF','BU','MB'],['CH','CO','GC','CL'],
                         ['CS','CP','CC','CQ'],['KS','DH','EL','EC'],
@@ -69,33 +84,40 @@ coursePlanner.semesterControl = {
                         ['CT','SY','SP','TM'],['TH','36','AP','04'],
                         ['CX','05','MW'],['PM','20','WS','YC']];
 
+        //loop through course codes to make requests
         for (var i = 0; i < courseCodes.length; i++) {
             this.makeCourseRequest(term_in, courseCodes[i]);
         }
     },
+    //make course requests for the given array of course codes
     makeCourseRequest:function(term_in,courseCode) {
+        //setup url to make request
         var theUrl = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20htmlpost%20where%20url%3D'https%3A%2F%2Ftelaris.wlu.ca%2Fssb_prod%2Fbwckschd.p_get_crse_unsec'%20and%20postdata%3D'term_in%3D" + term_in + "%26sel_subj%3Ddummy%26sel_day%3Ddummy%26sel_schd%3Ddummy%26sel_insm%3Ddummy%26sel_camp%3Ddummy%26sel_levl%3Ddummy%26sel_sess%3Ddummy%26sel_instr%3Ddummy%26sel_ptrm%3Ddummy%26sel_attr%3Ddummy%26sel_camp%3D%2525";
         for (var i = 0; i < courseCode.length; i++) {
             theUrl = theUrl + '%26sel_subj%3D' + courseCode[i];
         }
         theUrl = theUrl + "%26sel_crse%3D%26sel_title%3D%26sel_levl%3D%2525%26begin_hh%3D00%26begin_mi%3D00%26begin_ap%3Dx%26end_hh%3D00%26end_mi%3D00%26end_ap%3Dx'%20and%20xpath%3D%22%2F%2Fdiv%5B%40class%3D'pagebodydiv'%5D%2F%2Ftable%5B%40class%3D'datadisplaytable'%5D%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
+       
+        //make AJAX request
         $.ajax({
             type:'GET',
             url: theUrl,
             dataType:'json'
         }).done(function( data ) {
-
+            //if request fails, retry request
             if (data["query"]["count"] == 0) {
                coursePlanner.semesterControl.makeCourseRequest(term_in,courseCode);
             } else {
                 var tables = data["query"]["results"]["postresult"]["table"];
 
+                //loop through returned tables to extract and set various course data
                 for (var i = 0; i < tables.length; i++) {
                     if ((i % 2 == 0) && (i != tables.length - 1)) {
 
                         var course = new coursePlanner.Course();
 
                         try {
+                            //set course title, course code, subject, section and semester
                             var courseHeader = tables[i]["tr"][0]["th"]["a"]["content"];
                             var splitCourseHeader = courseHeader.split(" - ");
                             course.setCourseTitle(splitCourseHeader[0]);
@@ -109,6 +131,7 @@ coursePlanner.semesterControl = {
                         }
 
                         try {
+                            //set course location, professor, and timeslots
                             var courseInfo = tables[i]["tr"][1]["td"]["table"]["tr"][1]["td"];
                             if ("p" in courseInfo[3]) {
                                 course.setLocation(courseInfo[3]["p"]);
@@ -140,6 +163,7 @@ coursePlanner.semesterControl = {
 
                         }
 
+                        //get current semester, add course to it and set current semester updated with new course
                         var semester = coursePlanner.currentSemester.get();
                         semester.addCourse(course);
                         coursePlanner.currentSemester.set(semester);
@@ -147,6 +171,7 @@ coursePlanner.semesterControl = {
                 }
             }
         }).fail(function() {
+            //if AJAX request fails, show error message that some courses may not have been added
            $("#loadCoursesError").show();
         });
     },
@@ -232,6 +257,7 @@ coursePlanner.semesterControl = {
     //         .addCourse(emptyCourse);
     //     coursePlanner.currentSemester.set(semester);
     // },
+    //initialize new semesterControl object
     initialize: function() {
         this.getSemesters();
     }
