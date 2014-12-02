@@ -2,9 +2,7 @@
  * Controller object that controls the semester page and data.
  */
 coursePlanner.semesterControl = {
-    /*
-    * Function to set current semester for schedule page and courses
-    */
+    //Initialize new semester
     setSemester: function() {
         //set chosen semester
         var chosenTerm = $("#semesters").val();
@@ -36,9 +34,7 @@ coursePlanner.semesterControl = {
         });
 
     },
-    /*
-    * Function to make AJAX YQL request to get list of available semesters
-    */
+    //Make AJAX YQL request to get list of available semesters
     getSemesters:function() {
         //hide previous semester error message if shown
         $("#loadSemestersError").hide();
@@ -69,9 +65,7 @@ coursePlanner.semesterControl = {
             $("#loadSemestersError").show();
         });
     },
-    /*
-    * Function to make AJAX YQL request to get available courses for the given semester
-    */
+    //Make AJAX YQL request to get available courses for the given semester
     getCourses:function(term_in) {
         //hide previous courses error message if shown
         $("#loadCoursesError").hide();
@@ -95,9 +89,7 @@ coursePlanner.semesterControl = {
             this.makeCourseRequest(term_in, courseCodes[i]);
         }
     },
-    /*
-    * Function to make course requests for the given array of course codes
-    */
+    //make course requests for the given array of course codes
     makeCourseRequest:function(term_in,courseCode) {
         //setup url to make request
         var theUrl = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20htmlpost%20where%20url%3D'https%3A%2F%2Ftelaris.wlu.ca%2Fssb_prod%2Fbwckschd.p_get_crse_unsec'%20and%20postdata%3D'term_in%3D" + term_in + "%26sel_subj%3Ddummy%26sel_day%3Ddummy%26sel_schd%3Ddummy%26sel_insm%3Ddummy%26sel_camp%3Ddummy%26sel_levl%3Ddummy%26sel_sess%3Ddummy%26sel_instr%3Ddummy%26sel_ptrm%3Ddummy%26sel_attr%3Ddummy%26sel_camp%3D%2525";
@@ -183,9 +175,7 @@ coursePlanner.semesterControl = {
            $("#loadCoursesError").show();
         });
     },
-    /*
-    * Function to initialize new semester
-    */
+    //initialize new semesterControl object
     initialize: function() {
         this.getSemesters();
     }

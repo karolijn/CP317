@@ -9,12 +9,14 @@ coursePlanner.scheduleControl = {
             }
         });
     },
-    //method used to filter courses from the unscheduled course list using the search text field
+    // Method used to filter courses from the unscheduled course list using
+    // the search text field. Applies the [filter] to each course option by [index].
     filterCourseList: function(index, filter) {
         var searchText = $('#course_list').children()[index].textContent;
         return searchText.toLowerCase().indexOf( filter ) === -1;
     },
-    //method used to add course to schedule
+    // Method used to add course to schedule using the [courseKey] to look up the
+    // course in the semester's list of courses.
     addCourseToSchedule: function(courseKey) {
       var schedule = coursePlanner.utilities.getScheduleForCurrentSemester();
       try {
@@ -30,7 +32,7 @@ coursePlanner.scheduleControl = {
         alert(e.message);
       }
     },
-    //method used to remove course from schedule
+    // Method used to remove course from schedule by [courseKey].
     removeCourseFromSchedule: function(courseKey) {
       var schedule = coursePlanner.utilities.getScheduleForCurrentSemester();
       schedule.removeCourse(courseKey);
@@ -41,7 +43,7 @@ coursePlanner.scheduleControl = {
       $('.course_list').listview("refresh");
       $('.schedule_list').listview("refresh");
     },
-    //method called to fill the unscheduled course list
+    // Method called to fill the unscheduled course list
     populateCourseList: function() {
         if (coursePlanner.currentSemester.get() == null) {
             $.mobile.pageContainer.pagecontainer("change", '#home');
@@ -66,7 +68,8 @@ coursePlanner.scheduleControl = {
             }
         }
     },
-    //method called by populateCourseList method to add single item to the unscheduled course list
+    // Method called by populateCourseList to add a [course] item to a given list with [listid]
+    // and a callback [action] on the click event.
     addCourseListItem: function(course, listId, action) {
         var linkId = listId + course.getKey();
         var link = '<a id="' + linkId +'" href="#course_popup" data-rel="popup">'
@@ -79,7 +82,7 @@ coursePlanner.scheduleControl = {
             action();
         });
     },
-    //method called to fill the list of scheduled courses
+    // Method called to fill the list of scheduled courses
     populateSemesterList: function() {
         var listId = 'schedule_list';
         var scheduleList = $('#' + listId);
@@ -98,7 +101,8 @@ coursePlanner.scheduleControl = {
             this.addCourseListItem(course, listId, updatePopup(course));
         }
     },
-    //method called by populateSemesterCalendar to add entry to schedule calendar
+    // Method called by populateSemesterCalendar to add a [course] with a
+    // [timeslotId] to a given [timeslotCell].
     populateCalendarEntry: function(course, timeslotCell, timeslotId) {
         var colorEntries = ['#7AB5A8', '#478E7E', '#256E5D', '#0D4D3F', '#002D23'];
         var control = this;
@@ -132,7 +136,8 @@ coursePlanner.scheduleControl = {
             $("[calendar_entry='" + course_entry + "']" ).removeClass("selected");
         });
     },
-    //method used to fill popups with proper details
+    // Method used to fill popups with proper [coures] details. The behaviour
+    // of the popup buttons toggle whether the course [isScheduled].
     updatePopup: function (course, isScheduled) {
         var popupContent = '<p>' + course.getCourseTitle() + '</p>';
         for (var j = 0; j < course.getTimeslots().length; ++j) {
@@ -186,14 +191,11 @@ coursePlanner.scheduleControl = {
         popup.find('ul').listview().listview('refresh', true);
         popup.find('ul').listview('refresh', true);
     },
-    //method used to fill schedule calendar
+    //Method used to fill schedule calendar
     populateSemesterCalendar: function() {
         var calendarIncrement = 10;
         var scheduleCalendar = $('#schedule_calendar');
         scheduleCalendar.empty();
-
-        //TODO: get the min and max times
-        //TODO: figure out if Sat & Sun need to be displayed
 
         minTime = new Date(0, 0, 0, 8, 0, 0, 0);
         maxTime = new Date(0, 0, 0, 21, 0, 0, 0);
@@ -273,11 +275,11 @@ coursePlanner.scheduleControl = {
         }
 
     },
-    //method used to set title of schedule page to current semester
+    // Method used to set title of schedule page to current semester
     setTitle: function() {
         $('h1.semester_title').text(coursePlanner.currentSemester.get().toString());
     },
-    //method used to initialize scheduleControl object
+    // Method used to initialize scheduleControl object
     initialize: function() {
         this.setTitle();
         this.initCourseList();

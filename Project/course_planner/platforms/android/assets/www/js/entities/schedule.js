@@ -15,7 +15,11 @@ coursePlanner.Schedule = function() {
     timetable[coursePlanner.DAYS.Friday] = [];
 
     /**
-    * Structure containing ordered arrays of time entries for easy lookup/comparison.
+    * Structure containing ordered arrays of time entries
+    * for easy lookup/comparison. Constructed by passing in
+    * the [timestamp] of the event, the [courseKey] and
+    * a boolean indicating whether the event is the [start]
+    * of a course (if not, it indicates the end of the course.)
     */
     ScheduleEvent = function(timestamp, courseKey, start){
         var timeStamp = timestamp;
@@ -55,7 +59,7 @@ coursePlanner.Schedule = function() {
         return this;
     };
 
-    // Private method to add the course to a timetable. This is used for
+    // Private method to add the [course] to a timetable. This is used for
     // collision detection.
     // Throws: ScheduleConflictError, UnscheduledCourseError
     var addCourseToTimetable = function(course) {
@@ -108,7 +112,7 @@ coursePlanner.Schedule = function() {
         }
     };
 
-    // Private method to remove a course from the timetable.
+    // Private method to remove a [course] from the timetable.
     var removeCourseFromTimetable = function(course) {
         for (var i = 0; i < course.getTimeslots().length; ++i) {
             // for each timeslot a course has, find it on the schedule and remove it.
@@ -124,6 +128,7 @@ coursePlanner.Schedule = function() {
             }
         }
     }
+    // Loads a [courseList] from a storage object into the semester.
     this.fromStorage = function(courseList) {
         for (var i = 0; i < courseList.length; ++i) {
             course = coursePlanner.currentSemester.get().getCourse(courseList[i]);
@@ -131,9 +136,10 @@ coursePlanner.Schedule = function() {
         }
         return this;
     };
+    // Converts the courses into a storage object.
     this.toStorage = function() {
         return Object.keys(courses);
-    }
+    };
     this.removeCourse = function(courseKey) {
         if (courses[courseKey]) {
             removeCourseFromTimetable(courses[courseKey]);

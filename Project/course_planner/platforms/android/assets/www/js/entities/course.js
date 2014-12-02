@@ -40,6 +40,7 @@ coursePlanner.Course = function() {
     this.getProfessor = function() {
         return professor;
     };
+    // Returns a unique key for the given course.
     this.getKey = function() {
         if (semester != null) {
             return (semester.getKey() + courseCode).replace(/\s+/g, '');
