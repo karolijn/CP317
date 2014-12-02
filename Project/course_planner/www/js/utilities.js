@@ -11,6 +11,9 @@ coursePlanner.utilities.timeToDateTime = function(timeString) {
     return new Date(0, 0, 0, timeArray[0], timeArray[1], 0, 0);
 };
 
+/*
+* Utility function to get the previous schedule already made for a given semester from local storage.
+*/
 coursePlanner.utilities.getScheduleForCurrentSemester = function() {
     var semesterKey = coursePlanner.currentSemester.get().getKey();
     if (!localStorage.getItem(semesterKey)) {
@@ -21,12 +24,17 @@ coursePlanner.utilities.getScheduleForCurrentSemester = function() {
     return new coursePlanner.Schedule().fromStorage(savedSchedule);
 };
 
-
+/*
+* Utility function to save the current schedule for a given semester to local storage.
+*/
 coursePlanner.utilities.updateScheduleForCurrentSemester = function(schedule) {
     var semesterKey = coursePlanner.currentSemester.get().getKey();
     localStorage.setItem(semesterKey, JSON.stringify(schedule.toStorage()));
 };
 
+/*
+* Utility function to convert season from ajax request to coursePlanner.TERMS value.
+*/
 coursePlanner.utilities.getSeason = function(term_month) {
   var season;
   if (term_month == "01") {
@@ -39,6 +47,9 @@ coursePlanner.utilities.getSeason = function(term_month) {
   return season;
 };
 
+/*
+* Utility function to convert day from ajax request to coursePlanner.DAYS value.
+*/
 coursePlanner.utilities.getDay = function(code) {
   var day;
   if (code == "M") {
@@ -55,6 +66,9 @@ coursePlanner.utilities.getDay = function(code) {
   return day;
 };
 
+/*
+* Utility function to convert 12 hour time string to 24 hour time string.
+*/
 coursePlanner.utilities.getTime = function(timeString) {
   var returnedTime;
   var time = timeString.slice(0, timeString.indexOf(" "));
