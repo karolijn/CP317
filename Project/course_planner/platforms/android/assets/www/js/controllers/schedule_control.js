@@ -2,17 +2,21 @@
  * Controller object that controls the current schedule page and data.
  */
 coursePlanner.scheduleControl = {
-    initCourseList: function() {
+	initCourseList: function() {
         $('#schedule').on({
             pageinit: function(event) {
                 $('#course_list').listview().filterable('option', 'filterCallback', this.filterCourseList);
             }
         });
+		$('#subjects').change(function() {
+			var code = $('#subjects').val();
+			$('#course_list').listview().filterable('option', 'filterCallback', this.filterCourseList);
+		});
     },
     filterCourseList: function(index, filter) {
         if (filter.indexOf("subject: ") == 0) {
-			var searchText = $('#course_list').children()[index].textContent;
-			return searchText.toLowerCase().indexOf($('#subjects').find(':selected').value()) === -1;
+			var searchText = $('#course_list').children()[index].textContent.substring(0,3);
+			return searchText.indexOf(filter) === -1;
         } else {
             var searchText = $('#course_list').children()[index].textContent;
             return searchText.toLowerCase().indexOf( filter ) === -1;
@@ -162,7 +166,7 @@ coursePlanner.scheduleControl = {
 
         $('.course_info_link').click(function(event) {
             var courseKey = event.currentTarget.attributes['course_key'].value;
-            coursePlanner.viewCourseDetailsControl.setCourse(courseKey);
+            coursePlanner.courseDetailsControl.setCourse(courseKey);
         });
 
         $('.remove_from_schedule_link').click(function(event) {

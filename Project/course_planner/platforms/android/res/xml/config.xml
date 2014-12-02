@@ -21,4 +21,5 @@
     <access origin="*" />
     <preference name="StatusBarOverlaysWebView" value="false" />
     <preference name="StatusBarBackgroundColor" value="#595b5b" />
+    <gap:plugin name="org.apache.cordova.inappbrowser" />
 </widget>

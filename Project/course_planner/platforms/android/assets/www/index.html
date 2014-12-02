@@ -41,10 +41,13 @@
     			</select>
   			</fieldset>
 		</form>
-
-		<p>
-            <a href="#" onclick="coursePlanner.semesterControl.setSemester();">Go</a>
+		<p id="goToSchedulesPageBtn">
+            <a href="#" onclick="coursePlanner.semesterControl.setSemester();" data-role="button">Go</a>
         </p>
+		<div class="networkError" id="loadSemestersError">
+            <p>There was an error loading the semesters. Please refresh.</p>
+            <a onclick="coursePlanner.semesterControl.getSemesters();" data-role="button">Refresh</a>
+        </div>
 	</div>
 </div>
 
@@ -54,6 +57,10 @@
 	</div>
 
 	<div data-role="content" class="ui-content">
+		<div class="networkError" id="loadCoursesError">
+            <p>There was an error loading some of the courses. Please try again if the courses you wish to view are missing from the course list.</p>
+        </div>
+
 	    <h2 class="semester_name"></h2>
         <div id="schedule_calendar" style="width: 100%; height: 50%; overflow: auto">
         </div>
