@@ -35,7 +35,7 @@ coursePlanner.utilities.updateScheduleForCurrentSemester = function(schedule) {
 };
 
 /*
-* Utility function to convert season from ajax request to coursePlanner.TERMS value.
+* Utility function to convert [term_month] from ajax request to coursePlanner.TERMS value.
 */
 coursePlanner.utilities.getSeason = function(term_month) {
   var season;

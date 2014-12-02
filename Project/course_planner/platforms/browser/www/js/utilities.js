@@ -12,7 +12,8 @@ coursePlanner.utilities.timeToDateTime = function(timeString) {
 };
 
 /*
-* Utility function to get the previous schedule already made for a given semester from local storage.
+* Utility function to get the previous schedule already made for a given semester
+* from local storage.
 */
 coursePlanner.utilities.getScheduleForCurrentSemester = function() {
     var semesterKey = coursePlanner.currentSemester.get().getKey();
@@ -25,7 +26,8 @@ coursePlanner.utilities.getScheduleForCurrentSemester = function() {
 };
 
 /*
-* Utility function to save the current schedule for a given semester to local storage.
+* Utility function to save the current schedule for a given semester to local
+* storage.
 */
 coursePlanner.utilities.updateScheduleForCurrentSemester = function(schedule) {
     var semesterKey = coursePlanner.currentSemester.get().getKey();

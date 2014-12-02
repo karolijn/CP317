@@ -80,7 +80,5 @@ coursePlanner.exportToiCalControl =  {
 		} else {
 			location.replace(uri);
 		}
-		
-        //window.open( "data:text/calendar;charset=utf8," + encodeURI(cal));
     }
 };

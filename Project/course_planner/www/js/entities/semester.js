@@ -1,5 +1,5 @@
 /**
- * Class representing a semester. A semester is unique to the year and term and
+ * Class representing a semester. A semester is unique to the [year] and [term] and
  * contains all available courses.
  */
 coursePlanner.Semester = function(term, year) {
