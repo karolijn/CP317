@@ -19,6 +19,7 @@ coursePlanner.initialize = function() {
         });
     });
 
+    //reset search bar when returning to schedule page
     $('#schedule').on('pagebeforeshow', function() {
         $('#course_name_filter').val("").keyup();
     });
