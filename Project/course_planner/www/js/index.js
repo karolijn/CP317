@@ -19,6 +19,10 @@ coursePlanner.initialize = function() {
         });
     });
 
+    $('#schedule').on('pagebeforeshow', function() {
+        $('#course_name_filter').val("");
+    });
+
     // Resize the calendar on window resize.
     $(window).on('resize', function() {
         $('#schedule_calendar').css({
