@@ -15,6 +15,8 @@
     <!-- edit this to the background color of your app -->
     <preference name="StatusBarBackgroundColor" value="#595b5b" />
 
+	<gap:plugin name="org.apache.cordova.inappbrowser" />
+	
     <platform name="android">
         <icon src="res/android/icon-ldpi.png" density="ldpi" />
         <icon src="res/android/icon-mdpi.png" density="mdpi" />
