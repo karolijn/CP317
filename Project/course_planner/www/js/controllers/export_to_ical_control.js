@@ -3,24 +3,24 @@ coursePlanner.exportToiCalControl =  {
         var starttime = '';
         var endtime = '';
         var month = '';
-        var cal = "BEGIN:VCALENDAR\n"+
-                  "VERSION:2.0\n"+
-                  "PRODID:-//Our Company//NONSGML v1.0//EN\n";
+        var cal = "BEGIN:VCALENDAR"+
+                  "\nVERSION:2.0"+
+                  "\nPRODID:-//Laurier//NONSGML v1.0//EN";
         var currentSchedule = coursePlanner.utilities.getScheduleForCurrentSemester();
         var courseKeys = currentSchedule.getCourseKeys();
         for (var j = 0; j < courseKeys.length; ++j) {
             var course = coursePlanner.currentSemester.get().getCourse(courseKeys[j]);
-            if (course.getSemester().getTerm() == "Winter"){
+            if (course.getSemester().getTerm() == coursePlanner.TERMS.Winter){
                 month = "01";
             }
-            else if(course.getSemester().getTerm() == "Fall"){
+            else if(course.getSemester().getTerm() == coursePlanner.TERMS.Fall){
                 month = "09";
             }
-            else if(course.getSemester().getTerm() == "Spring"){
+            else if(course.getSemester().getTerm() == coursePlanner.TERMS.Spring){
                 month = "05";
             }
             else{
-                month = "01";
+                month = "07";
             }
             for (i = 0; i < course.getTimeslots().length; i++) {
                 //getting and formatting the start time. eg 8:30 to 0830 or 12:00 to 1200
@@ -40,21 +40,21 @@ coursePlanner.exportToiCalControl =  {
                 else{
                     endtime = endtime.substring(0,2) + endtime.substring(3,5);
                 }
-                cal += "BEGIN:VEVENT\n"+
-                       "UID:me@gmail.com\n"+
-                       "DTSTAMP:"+course.getSemester().getYear()+month+"01T"+starttime +"00Z\n"+
-                       "ORGANIZER;CN="+ course.getProfessor() +":MAILTO:me@gmail.com\n"+
-                       "DTSTART:" + course.getSemester().getYear()+month+"01T"+starttime +"00Z\n"+
-                       "\nRRULE:FREQ=WEEKLY;BYDAY=" + course.getTimeslots()[i].getDayString().substring(0, 2).toUpperCase(); +
-                       "\nDTEND:" + course.getSemester().getYear()+month+"01T"+endtime +"00Z\n"+
+                cal += "\nBEGIN:VEVENT"+
+                       "\nUID:me@gmail.com"+
+                       "\nDTSTAMP:"+course.getSemester().getYear()+month+"01T"+starttime +"00"+
+                       "\nORGANIZER;CN="+ course.getProfessor() +":MAILTO:me@gmail.com"+
+                       "\nDTSTART:" + course.getSemester().getYear()+month+"01T"+starttime +"00"+
+                       "\nRRULE:FREQ=WEEKLY;BYDAY=" + course.getTimeslots()[i].getDayString().substring(0, 2).toUpperCase() +
+                       "\nDTEND:" + course.getSemester().getYear()+month+"01T"+endtime +"00"+
                        "\nLOCATION:" + course.getLocation() +
                        "\nSUMMARY:"+ course.getCourseTitle() +
-                       "\nEND:VEVENT\n\n";
+                       "\nEND:VEVENT";
 
             }
         }
-        cal+= "END:VCALENDAR\n\n";
+        cal+= "\nEND:VCALENDAR";
 
-        window.open( "data:text/calendar;charset=utf8," + escape(cal));
+        window.open( "data:text/calendar;charset=utf8," + encodeURI(cal));
     }
 };
