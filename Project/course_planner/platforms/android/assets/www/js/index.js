@@ -12,7 +12,7 @@ coursePlanner.initialize = function() {
     });
 
     // Initialize and size the schedule calendar on the schedule page.
-    $('#schedule').on('pagebeforecreate', function() {
+    $('#schedule').on('pagebeforeshow', function() {
         coursePlanner.scheduleControl.initialize();
         $('#schedule_calendar').css({
             height: $(window).height() * 0.5
@@ -32,7 +32,7 @@ coursePlanner.initialize = function() {
     });
 
     // Adjust the course info div on the info page on load.
-    $('#info').on('pagebeforecreate', function() {
+    $('#info').on('pagebeforeshow', function() {
         coursePlanner.courseDetailsControl.initialize();
         $('#course_info').css({
             width: $(window).width()
