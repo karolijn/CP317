@@ -66,7 +66,21 @@ coursePlanner.exportToiCalControl =  {
 		//iCal footer
         cal+= "\nEND:VCALENDAR";
 		
+		
 		//Opens a file to save iCal data
-        window.open( "data:text/calendar;charset=utf8," + encodeURI(cal));
+		var filename = "calendar.ics";
+		var uri = "data:text/calendar;charset=utf8," + encodeURI(cal)
+		var link = document.createElement('a');
+		if (typeof link.download === 'string') {
+			document.body.appendChild(link); // Firefox requires the link to be in the body
+			link.download = filename;
+			link.href = uri;
+			link.click();
+			document.body.removeChild(link); // remove the link when done
+		} else {
+			location.replace(uri);
+		}
+		
+        //window.open( "data:text/calendar;charset=utf8," + encodeURI(cal));
     }
 };
