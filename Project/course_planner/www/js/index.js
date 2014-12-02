@@ -21,6 +21,8 @@ coursePlanner.initialize = function() {
 
     //reset search bar when returning to schedule page
     $('#schedule').on('pagebeforeshow', function() {
+        $('.course_list').listview("refresh");
+        $('.schedule_list').listview("refresh");
         $('#course_name_filter').val("").keyup();
     });
 
