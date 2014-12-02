@@ -19,6 +19,11 @@ coursePlanner.initialize = function() {
         });
     });
 
+    //reset search bar when returning to schedule page
+    $('#schedule').on('pagebeforeshow', function() {
+        $('#course_name_filter').val("").keyup();
+    });
+
     // Resize the calendar on window resize.
     $(window).on('resize', function() {
         $('#schedule_calendar').css({

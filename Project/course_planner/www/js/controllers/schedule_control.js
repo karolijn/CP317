@@ -8,20 +8,13 @@ coursePlanner.scheduleControl = {
                 $('#course_list').listview().filterable('option', 'filterCallback', this.filterCourseList);
             }
         });
-		$('#subjects').change(function() {
-			var code = $('#subjects').val();
-			$('#course_list').listview().filterable('option', 'filterCallback', this.filterCourseList);
-		});
     },
+    //method used to filter courses from the unscheduled course list using the search text field
     filterCourseList: function(index, filter) {
-        if (filter.indexOf("subject: ") == 0) {
-			var searchText = $('#course_list').children()[index].textContent.substring(0,3);
-			return searchText.indexOf(filter) === -1;
-        } else {
-            var searchText = $('#course_list').children()[index].textContent;
-            return searchText.toLowerCase().indexOf( filter ) === -1;
-        }
+        var searchText = $('#course_list').children()[index].textContent;
+        return searchText.toLowerCase().indexOf( filter ) === -1;
     },
+    //method used to add course to schedule
     addCourseToSchedule: function(courseKey) {
       var schedule = coursePlanner.utilities.getScheduleForCurrentSemester();
       try {
@@ -37,6 +30,7 @@ coursePlanner.scheduleControl = {
         alert(e.message);
       }
     },
+    //method used to remove course from schedule
     removeCourseFromSchedule: function(courseKey) {
       var schedule = coursePlanner.utilities.getScheduleForCurrentSemester();
       schedule.removeCourse(courseKey);
@@ -47,6 +41,7 @@ coursePlanner.scheduleControl = {
       $('.course_list').listview("refresh");
       $('.schedule_list').listview("refresh");
     },
+    //method called to fill the unscheduled course list
     populateCourseList: function() {
         if (coursePlanner.currentSemester.get() == null) {
             $.mobile.pageContainer.pagecontainer("change", '#home');
@@ -71,6 +66,7 @@ coursePlanner.scheduleControl = {
             }
         }
     },
+    //method called by populateCourseList method to add single item to the unscheduled course list
     addCourseListItem: function(course, listId, action) {
         var linkId = listId + course.getKey();
         var link = '<a id="' + linkId +'" href="#course_popup" data-rel="popup">'
@@ -83,6 +79,7 @@ coursePlanner.scheduleControl = {
             action();
         });
     },
+    //method called to fill the list of scheduled courses
     populateSemesterList: function() {
         var listId = 'schedule_list';
         var scheduleList = $('#' + listId);
@@ -101,6 +98,7 @@ coursePlanner.scheduleControl = {
             this.addCourseListItem(course, listId, updatePopup(course));
         }
     },
+    //method called by populateSemesterCalendar to add entry to schedule calendar
     populateCalendarEntry: function(course, timeslotCell, timeslotId) {
         var colorEntries = ['#7AB5A8', '#478E7E', '#256E5D', '#0D4D3F', '#002D23'];
         var control = this;
@@ -134,6 +132,7 @@ coursePlanner.scheduleControl = {
             $("[calendar_entry='" + course_entry + "']" ).removeClass("selected");
         });
     },
+    //method used to fill popups with proper details
     updatePopup: function (course, isScheduled) {
         var popupContent = '<p>' + course.getCourseTitle() + '</p>';
         for (var j = 0; j < course.getTimeslots().length; ++j) {
@@ -187,6 +186,7 @@ coursePlanner.scheduleControl = {
         popup.find('ul').listview().listview('refresh', true);
         popup.find('ul').listview('refresh', true);
     },
+    //method used to fill schedule calendar
     populateSemesterCalendar: function() {
         var calendarIncrement = 10;
         var scheduleCalendar = $('#schedule_calendar');
@@ -273,9 +273,11 @@ coursePlanner.scheduleControl = {
         }
 
     },
+    //method used to set title of schedule page to current semester
     setTitle: function() {
         $('h1.semester_title').text(coursePlanner.currentSemester.get().toString());
     },
+    //method used to initialize scheduleControl object
     initialize: function() {
         this.setTitle();
         this.initCourseList();
