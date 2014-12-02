@@ -6,14 +6,14 @@ coursePlanner.exportToiCalControl =  {
         var starttime = '';
         var endtime = '';
         var month = '';
-
+		
 		//iCal header
         var cal = "BEGIN:VCALENDAR"+
                   "\nVERSION:2.0"+
                   "\nPRODID:-//Laurier//NONSGML v1.0//EN";
         var currentSchedule = coursePlanner.utilities.getScheduleForCurrentSemester();
         var courseKeys = currentSchedule.getCourseKeys();
-
+		
 		//Gets semester and formats the month
         for (var j = 0; j < courseKeys.length; ++j) {
             var course = coursePlanner.currentSemester.get().getCourse(courseKeys[j]);
@@ -47,7 +47,7 @@ coursePlanner.exportToiCalControl =  {
                 else{
                     endtime = endtime.substring(0,2) + endtime.substring(3,5);
                 }
-
+				
 				//Timeslot for each course
                 cal += "\nBEGIN:VEVENT"+
                        "\nUID:me@gmail.com"+
@@ -62,11 +62,11 @@ coursePlanner.exportToiCalControl =  {
 
             }
         }
-
+		
 		//iCal footer
         cal+= "\nEND:VCALENDAR";
-
-
+		
+		
 		//Opens a file to save iCal data
 		var filename = "calendar.ics";
 		var uri = "data:text/calendar;charset=utf8," + encodeURI(cal)
@@ -77,13 +77,10 @@ coursePlanner.exportToiCalControl =  {
 			link.href = uri;
 			link.click();
 			document.body.removeChild(link); // remove the link when done
+		} else {
+			location.replace(uri);
 		}
-        } else {
-
-            uri = "http://docs.google.com/viewer?url= "+ uri;
-            location.replace(uri);
-		}
-
+		
         //window.open( "data:text/calendar;charset=utf8," + encodeURI(cal));
     }
 };

@@ -6,14 +6,14 @@ coursePlanner.exportToiCalControl =  {
         var starttime = '';
         var endtime = '';
         var month = '';
-
+		
 		//iCal header
         var cal = "BEGIN:VCALENDAR"+
                   "\nVERSION:2.0"+
                   "\nPRODID:-//Laurier//NONSGML v1.0//EN";
         var currentSchedule = coursePlanner.utilities.getScheduleForCurrentSemester();
         var courseKeys = currentSchedule.getCourseKeys();
-
+		
 		//Gets semester and formats the month
         for (var j = 0; j < courseKeys.length; ++j) {
             var course = coursePlanner.currentSemester.get().getCourse(courseKeys[j]);
@@ -47,7 +47,7 @@ coursePlanner.exportToiCalControl =  {
                 else{
                     endtime = endtime.substring(0,2) + endtime.substring(3,5);
                 }
-
+				
 				//Timeslot for each course
                 cal += "\nBEGIN:VEVENT"+
                        "\nUID:me@gmail.com"+
@@ -62,33 +62,11 @@ coursePlanner.exportToiCalControl =  {
 
             }
         }
-
+		
 		//iCal footer
         cal+= "\nEND:VCALENDAR";
-
-        cal = "BEGIN:VCALENDAR" +
-"\nPRODID:-//Some organization//some application//EN"
-"\nVERSION:2.0" +
-"\nMETHOD:REQUEST" +
-"\nBEGIN:VEVENT" +
-"\nUID:20120925T072912Z-140@http://localhost/www/" +
-"\nCREATED:20120925T072912Z" +
-"\nDTSTAMP:20120922T090500Z" +
-"\nDTSTART:20120922T090500Z" +
-"\nDTEND:20120923T090500Z" +
-"\nDESCRIPTION:Please attend this sample meeting" +
-"\nSUMMARY:Invitation to attend training" +
-"\nLOCATION:Earth" +
-"\nATTENDEE;RSVP=TRUE:mailto:periklis@example.com" +
-"\nORGANIZER;CN=periklis@example.com:mailto:periklis@example.com" +
-"\nLAST-MODIFIED:20120922T090500Z" +
-"\nPRIORITY:5" +
-"\nSEQUENCE:0" +
-"\nSTATUS:CONFIRMED" +
-"\nTRANSP:TRANSPARENT" +
-"\nEND:VEVENT" +
-"\nEND:VCALENDAR";
-
+		
+		
 		//Opens a file to save iCal data
 		var filename = "calendar.ics";
 		var uri = "data:text/calendar;charset=utf8," + encodeURI(cal)
@@ -99,11 +77,10 @@ coursePlanner.exportToiCalControl =  {
 			link.href = uri;
 			link.click();
 			document.body.removeChild(link); // remove the link when done
+		} else {
+			location.replace(uri);
 		}
-        } else {
-            location.replace(uri);
-		}
-
+		
         //window.open( "data:text/calendar;charset=utf8," + encodeURI(cal));
     }
 };
