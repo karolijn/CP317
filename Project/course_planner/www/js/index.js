@@ -19,7 +19,7 @@ coursePlanner.initialize = function() {
         });
     });
 
-    //reset search bar when returning to schedule page
+    //reset search bar and refresh lists when returning to schedule page
     $('#schedule').on('pagebeforeshow', function() {
         $('.course_list').listview("refresh");
         $('.schedule_list').listview("refresh");
