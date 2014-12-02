@@ -3,49 +3,49 @@
  */
 coursePlanner.courseDetailsControl = {
     course: '',
-	
+
 	//Retrieves course object from courseKey
     setCourse: function(courseKey) {
         course = coursePlanner.currentSemester.get().getCourse(courseKey);
     },
-	
+
 	//Sets title of the webpage to selected course
     setTitle: function() {
         $('h1.info_title').text(course.getCourseCode);
     },
-	
+
 	//Initializes the control
     initialize: function() {
         this.setTitle();
-		
+
         var control = this;
         $(document).on("pageshow", "#info", function(){
             control.populateCourseInfo();
         });
     },
-	
+
 	//Populates the course details page with course data
     populateCourseInfo: function() {
 		this.setTitle();
-        
+
 		//Formats the timeslots from course data
 		timeslots = '<tr> <th>Timeslots</th> <td>';
         for (i = 0; i < course.getTimeslots().length; i++) {
             timeslots+= course.getTimeslots()[i].getDayString() +', ' + course.getTimeslots()[i].getStartTime()+', ' +course.getTimeslots()[i].getEndTime() +'<br>';
         }
-		
+
 		//Formats the term from course data
 		var term = course.getSemester().getTerm();
 		if (term == coursePlanner.TERMS.Winter){
 			term = "Winter";
-		}else if (term == coursePlanner.TERMS.Fall){
+		} else if (term == coursePlanner.TERMS.Fall){
 			term = "Fall";
-		}else if (term = coursePlanner.TERMS.Spring){
+		} else if (term = coursePlanner.TERMS.Spring){
 			term = "Spring";
-		}else{
+		} else{
 			term = "Summer";
         }
-		
+
 		//Formats details table
 		timeslots+='</td> </tr>';
         table_data = '<tr> <th>Course Code</th> <td>'+course.getCourseCode()+'</td> </tr>'+
